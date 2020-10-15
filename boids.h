@@ -5,8 +5,15 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
+#include "vector.h"
+
 #define DEFAULT_WIDTH  1024
 #define DEFAULT_HEIGHT 576
+
+typedef struct {
+	Vector pos;
+	Vector velocity;
+} Boid;
 
 typedef struct {
 	gint width;
