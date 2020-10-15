@@ -2,7 +2,7 @@
 CC = gcc
 CFLAGS = -g -Wall `pkg-config --cflags gtk+-3.0`
 LINKFLAGS = `pkg-config --libs gtk+-3.0` -lm
-INCS = boids.h
+INCS = boids.h vector.h
 SRCS = boids.c swarm.c gui.c
 OBJS = $(SRCS:%.c=%.o)
 TARGET = boids
