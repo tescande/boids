@@ -18,6 +18,45 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 	cairo_paint(cr);
 }
 
+static void draw(BoidsGui *gui)
+{
+	int i;
+
+	cairo_set_source_rgba(gui->cr, 0.8, 0.8, 0.8, 1.0);
+	cairo_paint(gui->cr);
+
+	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
+		Boid *b = swarm_get_boid(gui->swarm, i);
+		Vector velocity = b->velocity;
+		Vector orth;
+		Vector top = b->pos;
+		Vector bottom1 = b->pos;
+		Vector bottom2 = b->pos;
+
+		vector_set_mag(&velocity, 5);
+		vector_add(&top, &velocity);
+		vector_sub(&bottom1, &velocity);
+		vector_sub(&bottom2, &velocity);
+
+		/* Using 'orth.x = -velocity.y;' gives a nice 3D effect */
+		orth.x = velocity.y;
+		orth.y = -velocity.x;
+		vector_set_mag(&orth, 3);
+
+		vector_sub(&bottom1, &orth);
+		vector_add(&bottom2, &orth);
+
+		cairo_set_line_width(gui->cr, 3);
+		cairo_set_source_rgba(gui->cr, 0.0, 0.0, 1.0, 1.0);
+
+		cairo_move_to(gui->cr, bottom1.x, bottom1.y);
+		cairo_line_to(gui->cr, top.x, top.y);
+		cairo_line_to(gui->cr, bottom2.x, bottom2.y);
+		cairo_set_line_join(gui->cr, CAIRO_LINE_JOIN_ROUND);
+		cairo_stroke(gui->cr);
+	}
+}
+
 static void cairo_init(BoidsGui *gui)
 {
 	cairo_destroy(gui->cr);
@@ -27,6 +66,8 @@ static void cairo_init(BoidsGui *gui)
 						  gui->swarm->width,
 						  gui->swarm->height);
 	gui->cr = cairo_create(gui->surface);
+
+	draw(gui);
 }
 
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
