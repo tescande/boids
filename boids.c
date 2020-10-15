@@ -6,8 +6,9 @@
 int main(int argc, char **argv)
 {
 	Swarm *swarm;
+	int num_boids = DEFAULT_NUM_BOIDS;
 
-	swarm = swarm_alloc();
+	swarm = swarm_alloc(num_boids);
 
 	gtk_boids_run(swarm);
 
