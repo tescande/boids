@@ -126,6 +126,15 @@ static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 	g_timeout_add(40, (GSourceFunc)queue_draw, gui);
 }
 
+static void on_step_clicked(GtkButton *button, BoidsGui *gui)
+{
+	if (gui->run)
+		return;
+
+	animate_thread(gui);
+	gtk_widget_queue_draw(gui->drawing_area);
+}
+
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	gui->run = FALSE;
@@ -179,6 +188,11 @@ static void gui_show(BoidsGui *gui)
 	button = gtk_button_new_with_label("Start");
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_start_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+
+	button = gtk_button_new_with_label("Step");
+	g_signal_connect(G_OBJECT(button), "clicked",
+			 G_CALLBACK(on_step_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
 	gtk_widget_show_all(window);
