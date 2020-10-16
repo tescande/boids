@@ -135,6 +135,16 @@ static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 	gtk_widget_queue_draw(gui->drawing_area);
 }
 
+static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
+
+	if (!gui->run) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+}
+
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	gui->run = FALSE;
@@ -160,6 +170,9 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *hbox;
 	GtkWidget *drawing_area;
 	GtkWidget *button;
+	GtkWidget *spin;
+	GtkWidget *label;
+	GtkWidget *separator;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Boids");
@@ -194,6 +207,19 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_step_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	label = gtk_label_new("Boids:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(MIN_BOIDS, MAX_BOIDS, 100);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_num_boids(gui->swarm));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_num_boids_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 
 	gtk_widget_show_all(window);
 }
