@@ -160,6 +160,16 @@ static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 	}
 }
 
+static void on_dead_angle_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->dead_angle = gtk_toggle_button_get_active(button);
+}
+
+static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_dead_angle(gui->swarm, gtk_spin_button_get_value_as_int(spin));
+}
+
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	gui->run = FALSE;
@@ -258,6 +268,17 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_cohesion_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
+	check = gtk_check_button_new_with_label("FoV Dead Angle");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->cohesion);
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_dead_angle_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(0, 360, 10);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_dead_angle(gui->swarm));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_dead_angle_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 	gtk_widget_show_all(window);
 }
 

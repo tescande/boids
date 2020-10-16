@@ -31,6 +31,7 @@ typedef struct {
 	gboolean avoid;
 	gboolean align;
 	gboolean cohesion;
+	gboolean dead_angle;
 	gdouble cos_dead_angle;
 } Swarm;
 

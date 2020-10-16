@@ -44,7 +44,7 @@ void swarm_move(Swarm *swarm)
 			if (dist >= COHESION_DIST * COHESION_DIST)
 				continue;
 
-			if (swarm->cos_dead_angle) {
+			if (swarm->dead_angle) {
 				vector_set(&v, dx, dy);
 
 				cos_angle = vector_cos_angle(&b1->velocity, &v);
