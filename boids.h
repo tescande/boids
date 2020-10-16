@@ -17,6 +17,7 @@
 typedef struct {
 	Vector pos;
 	Vector velocity;
+	gdouble red;
 } Boid;
 
 typedef struct {

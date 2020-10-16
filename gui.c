@@ -55,7 +55,7 @@ static void draw(BoidsGui *gui)
 		vector_add(&bottom2, &orth);
 
 		cairo_set_line_width(gui->cr, 3);
-		cairo_set_source_rgba(gui->cr, 0.0, 0.0, 1.0, 1.0);
+		cairo_set_source_rgba(gui->cr, b->red, 0.0, 1.0 - b->red, 1.0);
 
 		cairo_move_to(gui->cr, bottom1.x, bottom1.y);
 		cairo_line_to(gui->cr, top.x, top.y);
