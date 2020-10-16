@@ -26,12 +26,26 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 	g_mutex_unlock(&gui->lock);
 }
 
+static void draw_obstacles(BoidsGui *gui)
+{
+	int i;
+
+	cairo_set_source_rgba(gui->cr, 0.3, 0.3, 0.3, 1.0);
+	for (i = 0; i < gui->swarm->obstacles->len; i++) {
+		Vector *o = swarm_get_obstacle_pos(gui->swarm, i);
+		cairo_arc(gui->cr, o->x, o->y, OBSTACLE_RADIUS, 0, 2 * G_PI);
+		cairo_fill(gui->cr);
+	}
+}
+
 static void draw(BoidsGui *gui)
 {
 	int i;
 
 	cairo_set_source_rgba(gui->cr, 0.8, 0.8, 0.8, 1.0);
 	cairo_paint(gui->cr);
+
+	draw_obstacles(gui);
 
 	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
 		Boid *b = swarm_get_boid(gui->swarm, i);
@@ -170,6 +184,24 @@ static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
 	swarm_set_dead_angle(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 }
 
+static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
+				 BoidsGui *gui)
+{
+	gboolean redraw = TRUE;
+
+	if (!(event->state & GDK_CONTROL_MASK))
+		swarm_add_obstacle(gui->swarm, event->x, event->y, 0);
+	else
+		redraw = swarm_remove_obstacle(gui->swarm, event->x, event->y);
+
+	if (!gui->run && redraw) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+
+	return TRUE;
+}
+
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	gui->run = FALSE;
@@ -216,9 +248,11 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(drawing_area), "draw",
 			 G_CALLBACK(on_draw), gui);
-	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK);
+	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK | GDK_BUTTON_PRESS_MASK);
 	g_signal_connect(G_OBJECT(drawing_area), "configure-event",
 			 G_CALLBACK(on_configure_event), gui);
+	g_signal_connect(G_OBJECT(drawing_area), "button-press-event",
+			 G_CALLBACK(on_mouse_clicked), gui);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
