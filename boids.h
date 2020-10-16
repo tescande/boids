@@ -38,6 +38,8 @@ typedef struct {
 	gint width;
 	gint height;
 
+	gboolean walls;
+
 	gboolean avoid;
 	gboolean align;
 	gboolean cohesion;
@@ -55,7 +57,7 @@ static inline gdouble rad2deg(gdouble rad)
 	return rad * 180 / G_PI;
 }
 
-Swarm *swarm_alloc(guint num_boids);
+Swarm *swarm_alloc(guint num_boids, gboolean walls);
 void swarm_free(Swarm *swarm);
 
 void swarm_update_sizes(Swarm *swarm, guint width, guint height);
@@ -73,6 +75,9 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
 #define swarm_get_obstacle_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
 #define swarm_get_obstacle_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
+
+void swarm_remove_walls(Swarm *swarm);
+void swarm_add_walls(Swarm *swarm);
 
 void swarm_move(Swarm *swarm);
 

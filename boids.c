@@ -8,11 +8,14 @@ int main(int argc, char **argv)
 	Swarm *swarm;
 	int num_boids = DEFAULT_NUM_BOIDS;
 	int seed = 0;
+	gboolean walls = FALSE;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry entries[] = {
 		{ "num-boids", 'n', 0, G_OPTION_ARG_INT, &num_boids,
 		  "Number of boids", "VAL" },
+		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
+		  "Add walls to the field", NULL },
 		{ "rand-seed", 's', 0, G_OPTION_ARG_INT, &seed,
 		  "Random seed value", "VAL" },
 		{ NULL }
@@ -28,7 +31,7 @@ int main(int argc, char **argv)
 	if (seed)
 		g_random_set_seed(seed);
 
-	swarm = swarm_alloc(num_boids);
+	swarm = swarm_alloc(num_boids, walls);
 
 	gtk_boids_run(swarm);
 

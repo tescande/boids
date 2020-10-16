@@ -150,6 +150,43 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 	return FALSE;
 }
 
+void swarm_remove_walls(Swarm *swarm)
+{
+	GArray *obstacles = swarm->obstacles;
+	guint flags;
+	gint i;
+
+	i = obstacles->len;
+	while (i--) {
+		flags = swarm_get_obstacle_flags(swarm, i);
+
+		if ((flags & OBSTACLE_FLAG_WALL) == OBSTACLE_FLAG_WALL)
+			g_array_remove_index(obstacles, i);
+	}
+}
+
+void swarm_add_walls(Swarm *swarm)
+{
+	gint x, y;
+
+	swarm_remove_walls(swarm);
+
+	if (!swarm->walls)
+		return;
+
+	y = OBSTACLE_RADIUS * 1.5;
+	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += OBSTACLE_RADIUS) {
+		swarm_add_obstacle(swarm, x, -y, OBSTACLE_FLAG_WALL);
+		swarm_add_obstacle(swarm, x, swarm->height + y, OBSTACLE_FLAG_WALL);
+	}
+
+	x = y;
+	for (y = 0; y < swarm->height + OBSTACLE_RADIUS; y += OBSTACLE_RADIUS) {
+		swarm_add_obstacle(swarm, -x, y, OBSTACLE_FLAG_WALL);
+		swarm_add_obstacle(swarm, swarm->width + x, y, OBSTACLE_FLAG_WALL);
+	}
+}
+
 guint swarm_get_dead_angle(Swarm *swarm)
 {
 	return ceil(rad2deg((G_PI - acos(swarm->cos_dead_angle)) * 2));
@@ -192,8 +229,13 @@ void swarm_set_num_boids(Swarm *swarm, guint num)
 
 void swarm_update_sizes(Swarm *swarm, guint width, guint height)
 {
+	if (swarm->width == width && swarm->height == height)
+		return;
+
 	swarm->width = width;
 	swarm->height = height;
+
+	swarm_add_walls(swarm);
 }
 
 void swarm_free(Swarm *swarm)
@@ -203,7 +245,7 @@ void swarm_free(Swarm *swarm)
 	g_free(swarm);
 }
 
-Swarm *swarm_alloc(guint num_boids)
+Swarm *swarm_alloc(guint num_boids, gboolean walls)
 {
 	Swarm *swarm;
 
@@ -217,6 +259,9 @@ Swarm *swarm_alloc(guint num_boids)
 	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
 
 	swarm->obstacles = g_array_new(FALSE, FALSE, sizeof(Obstacle));
+
+	swarm->walls = walls;
+	swarm_add_walls(swarm);
 
 	return swarm;
 }
