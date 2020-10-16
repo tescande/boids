@@ -76,6 +76,9 @@ void swarm_move(Swarm *swarm)
 
 		b1->red = 1.0 - ((gdouble)min_dist / PROXIMITY_DIST);
 
+		if (!vector_is_null(&align))
+			vector_set_mag(&align, 3.5);
+
 		if (cohesion_n) {
 			vector_div(&cohesion, cohesion_n);
 			vector_sub(&cohesion, &b1->pos);
