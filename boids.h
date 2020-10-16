@@ -14,6 +14,8 @@
 #define MIN_BOIDS 1
 #define MAX_BOIDS 1000
 
+#define DEFAULT_DEAD_ANGLE (60)
+
 typedef struct {
 	Vector pos;
 	Vector velocity;
@@ -29,7 +31,18 @@ typedef struct {
 	gboolean avoid;
 	gboolean align;
 	gboolean cohesion;
+	gdouble cos_dead_angle;
 } Swarm;
+
+static inline gdouble deg2rad(gdouble deg)
+{
+	return deg * G_PI / 180;
+}
+
+static inline gdouble rad2deg(gdouble rad)
+{
+	return rad * 180 / G_PI;
+}
 
 Swarm *swarm_alloc(guint num_boids);
 void swarm_free(Swarm *swarm);
@@ -40,6 +53,9 @@ void swarm_update_sizes(Swarm *swarm, guint width, guint height);
 void swarm_set_num_boids(Swarm *swarm, guint num);
 
 #define swarm_get_boid(swarm, n) (&g_array_index((swarm)->boids, Boid, n))
+
+guint swarm_get_dead_angle(Swarm *swarm);
+void swarm_set_dead_angle(Swarm *swarm, guint angle);
 
 void swarm_move(Swarm *swarm);
 

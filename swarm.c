@@ -15,6 +15,7 @@ void swarm_move(Swarm *swarm)
 	double dist;
 	guint min_dist;
 	gdouble dx, dy;
+	gdouble cos_angle;
 	int cohesion_n;
 	Vector avoid;
 	Vector align;
@@ -42,6 +43,14 @@ void swarm_move(Swarm *swarm)
 			dist = (dx * dx) + (dy * dy);
 			if (dist >= COHESION_DIST * COHESION_DIST)
 				continue;
+
+			if (swarm->cos_dead_angle) {
+				vector_set(&v, dx, dy);
+
+				cos_angle = vector_cos_angle(&b1->velocity, &v);
+				if (cos_angle < swarm->cos_dead_angle)
+					continue;
+			}
 
 			/* Do the sqrt only when really needed */
 			dist = sqrt(dist);
@@ -82,6 +91,19 @@ void swarm_move(Swarm *swarm)
 		b1->pos.x = fmod(b1->pos.x + swarm->width, swarm->width);
 		b1->pos.y = fmod(b1->pos.y + swarm->height, swarm->height);
 	}
+}
+
+guint swarm_get_dead_angle(Swarm *swarm)
+{
+	return ceil(rad2deg((G_PI - acos(swarm->cos_dead_angle)) * 2));
+}
+
+void swarm_set_dead_angle(Swarm *swarm, guint angle)
+{
+	if (angle > 360)
+		angle = 360;
+
+	swarm->cos_dead_angle = cos(G_PI - deg2rad((gdouble)angle / 2));
 }
 
 void swarm_set_num_boids(Swarm *swarm, guint num)
@@ -134,6 +156,7 @@ Swarm *swarm_alloc(guint num_boids)
 	swarm->boids = g_array_new(FALSE, FALSE, sizeof(Boid));
 
 	swarm_set_num_boids(swarm, num_boids);
+	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
 
 	return swarm;
 }
