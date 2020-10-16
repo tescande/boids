@@ -1,8 +1,49 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
+#define PROXIMITY_DIST 30
+
 void swarm_move(Swarm *swarm)
 {
+	int i;
+	int j;
+	Boid *b1;
+	Boid *b2;
+	double dist;
+	guint min_dist;
+	gdouble dx, dy;
+
+	for (i = 0; i < swarm_get_num_boids(swarm); i++) {
+		b1 = swarm_get_boid(swarm, i);
+
+		min_dist = PROXIMITY_DIST;
+
+		for (j = 0; j < swarm_get_num_boids(swarm); j++) {
+			b2 = swarm_get_boid(swarm, j);
+
+			if (j == i)
+				continue;
+
+			/* Avoid a bunch os useless sqrt */
+			dx = b2->pos.x - b1->pos.x;
+			dy = b2->pos.y - b1->pos.y;
+			dist = (dx * dx) + (dy * dy);
+			if (dist >= PROXIMITY_DIST * PROXIMITY_DIST)
+				continue;
+
+			/* Do the sqrt only when really needed */
+			dist = sqrt(dist);
+			if (dist < min_dist)
+				min_dist = dist;
+		}
+
+		b1->red = 1.0 - ((gdouble)min_dist / PROXIMITY_DIST);
+
+		vector_add(&b1->pos, &b1->velocity);
+
+		b1->pos.x = fmod(b1->pos.x + swarm->width, swarm->width);
+		b1->pos.y = fmod(b1->pos.y + swarm->height, swarm->height);
+	}
 }
 
 void swarm_set_num_boids(Swarm *swarm, guint num)
