@@ -16,6 +16,8 @@
 
 #define DEFAULT_DEAD_ANGLE (60)
 
+#define OBSTACLE_RADIUS 20
+
 typedef struct {
 	Vector pos;
 	Vector velocity;
@@ -23,7 +25,15 @@ typedef struct {
 } Boid;
 
 typedef struct {
+	Vector pos;
+	guint flags;
+} Obstacle;
+
+#define OBSTACLE_FLAG_WALL 0x01
+
+typedef struct {
 	GArray *boids;
+	GArray *obstacles;
 
 	gint width;
 	gint height;

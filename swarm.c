@@ -142,6 +142,7 @@ void swarm_update_sizes(Swarm *swarm, guint width, guint height)
 void swarm_free(Swarm *swarm)
 {
 	g_array_free(swarm->boids, TRUE);
+	g_array_free(swarm->obstacles, TRUE);
 	g_free(swarm);
 }
 
@@ -157,6 +158,8 @@ Swarm *swarm_alloc(guint num_boids)
 
 	swarm_set_num_boids(swarm, num_boids);
 	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
+
+	swarm->obstacles = g_array_new(FALSE, FALSE, sizeof(Obstacle));
 
 	return swarm;
 }
