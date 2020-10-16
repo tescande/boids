@@ -30,6 +30,8 @@ typedef struct {
 Swarm *swarm_alloc(guint num_boids);
 void swarm_free(Swarm *swarm);
 
+void swarm_update_sizes(Swarm *swarm, guint width, guint height);
+
 #define swarm_get_num_boids(swarm) ((swarm)->boids->len)
 void swarm_set_num_boids(Swarm *swarm, guint num);
 

@@ -73,6 +73,12 @@ void swarm_set_num_boids(Swarm *swarm, guint num)
 	}
 }
 
+void swarm_update_sizes(Swarm *swarm, guint width, guint height)
+{
+	swarm->width = width;
+	swarm->height = height;
+}
+
 void swarm_free(Swarm *swarm)
 {
 	g_array_free(swarm->boids, TRUE);

@@ -138,6 +138,7 @@ static void on_destroy(GtkWindow *win, BoidsGui *gui)
 static gboolean on_configure_event(GtkWidget *widget, GdkEventConfigure *event,
 				   BoidsGui *gui)
 {
+	swarm_update_sizes(gui->swarm, event->width, event->height);
 	cairo_init(gui);
 
 	return FALSE;
