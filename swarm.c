@@ -2,6 +2,7 @@
 #include "boids.h"
 
 #define AVOID_DIST 25
+#define ALIGN_DIST 120
 #define PROXIMITY_DIST 30
 
 void swarm_move(Swarm *swarm)
@@ -14,12 +15,14 @@ void swarm_move(Swarm *swarm)
 	guint min_dist;
 	gdouble dx, dy;
 	Vector avoid;
+	Vector align;
 	Vector v;
 
 	for (i = 0; i < swarm_get_num_boids(swarm); i++) {
 		b1 = swarm_get_boid(swarm, i);
 
 		vector_init(&avoid);
+		vector_init(&align);
 		min_dist = PROXIMITY_DIST;
 
 		for (j = 0; j < swarm_get_num_boids(swarm); j++) {
@@ -32,7 +35,7 @@ void swarm_move(Swarm *swarm)
 			dx = b2->pos.x - b1->pos.x;
 			dy = b2->pos.y - b1->pos.y;
 			dist = (dx * dx) + (dy * dy);
-			if (dist >= PROXIMITY_DIST * PROXIMITY_DIST)
+			if (dist >= ALIGN_DIST * ALIGN_DIST)
 				continue;
 
 			/* Do the sqrt only when really needed */
@@ -45,12 +48,17 @@ void swarm_move(Swarm *swarm)
 				vector_sub(&v, &b2->pos);
 				vector_div(&v, dist);
 				vector_add(&avoid, &v);
+			} else if (dist < ALIGN_DIST) {
+				v = b2->velocity;
+				vector_div(&v, dist);
+				vector_add(&align, &v);
 			}
 		}
 
 		b1->red = 1.0 - ((gdouble)min_dist / PROXIMITY_DIST);
 
 		vector_add(&b1->velocity, &avoid);
+		vector_add(&b1->velocity, &align);
 
 		vector_set_mag(&b1->velocity, 5);
 
