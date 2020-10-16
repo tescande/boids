@@ -3,6 +3,7 @@
 
 #define AVOID_DIST 25
 #define ALIGN_DIST 120
+#define COHESION_DIST 200
 #define PROXIMITY_DIST 30
 
 void swarm_move(Swarm *swarm)
@@ -14,8 +15,10 @@ void swarm_move(Swarm *swarm)
 	double dist;
 	guint min_dist;
 	gdouble dx, dy;
+	int cohesion_n;
 	Vector avoid;
 	Vector align;
+	Vector cohesion;
 	Vector v;
 
 	for (i = 0; i < swarm_get_num_boids(swarm); i++) {
@@ -23,6 +26,8 @@ void swarm_move(Swarm *swarm)
 
 		vector_init(&avoid);
 		vector_init(&align);
+		vector_init(&cohesion);
+		cohesion_n = 0;
 		min_dist = PROXIMITY_DIST;
 
 		for (j = 0; j < swarm_get_num_boids(swarm); j++) {
@@ -35,7 +40,7 @@ void swarm_move(Swarm *swarm)
 			dx = b2->pos.x - b1->pos.x;
 			dy = b2->pos.y - b1->pos.y;
 			dist = (dx * dx) + (dy * dy);
-			if (dist >= ALIGN_DIST * ALIGN_DIST)
+			if (dist >= COHESION_DIST * COHESION_DIST)
 				continue;
 
 			/* Do the sqrt only when really needed */
@@ -52,13 +57,23 @@ void swarm_move(Swarm *swarm)
 				v = b2->velocity;
 				vector_div(&v, dist);
 				vector_add(&align, &v);
+			} else if (dist < COHESION_DIST) {
+				cohesion_n++;
+				vector_add(&cohesion, &b2->pos);
 			}
 		}
 
 		b1->red = 1.0 - ((gdouble)min_dist / PROXIMITY_DIST);
 
+		if (cohesion_n) {
+			vector_div(&cohesion, cohesion_n);
+			vector_sub(&cohesion, &b1->pos);
+			vector_set_mag(&cohesion, 0.5);
+		}
+
 		vector_add(&b1->velocity, &avoid);
 		vector_add(&b1->velocity, &align);
+		vector_add(&b1->velocity, &cohesion);
 
 		vector_set_mag(&b1->velocity, 5);
 
