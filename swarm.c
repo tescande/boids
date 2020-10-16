@@ -93,6 +93,39 @@ void swarm_move(Swarm *swarm)
 	}
 }
 
+void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags)
+{
+	Obstacle o = {
+		.pos.x = x,
+		.pos.y = y,
+		.flags = flags
+	};
+
+	g_array_append_val(swarm->obstacles, o);
+}
+
+gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
+{
+	Vector *o;
+	gdouble dist;
+	int i;
+
+	if (!swarm->obstacles->len)
+		return FALSE;
+
+	i = swarm->obstacles->len;
+	while (i--) {
+		o = swarm_get_obstacle_pos(swarm, i);
+		dist = pow(o->x - x, 2) + pow(o->y - y, 2);
+		if (dist <= OBSTACLE_RADIUS * OBSTACLE_RADIUS) {
+			g_array_remove_index(swarm->obstacles, i);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 guint swarm_get_dead_angle(Swarm *swarm)
 {
 	return ceil(rad2deg((G_PI - acos(swarm->cos_dead_angle)) * 2));

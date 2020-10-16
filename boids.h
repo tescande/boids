@@ -68,6 +68,12 @@ void swarm_set_num_boids(Swarm *swarm, guint num);
 guint swarm_get_dead_angle(Swarm *swarm);
 void swarm_set_dead_angle(Swarm *swarm, guint angle);
 
+void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
+gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
+
+#define swarm_get_obstacle_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
+#define swarm_get_obstacle_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
+
 void swarm_move(Swarm *swarm);
 
 int gtk_boids_run(Swarm *swarm);
