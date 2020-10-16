@@ -164,6 +164,18 @@ static void on_cohesion_clicked(GtkToggleButton *button, BoidsGui *gui)
 	gui->swarm->cohesion = gtk_toggle_button_get_active(button);
 }
 
+static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->walls = gtk_toggle_button_get_active(button);
+
+	swarm_add_walls(gui->swarm);
+
+	if (!gui->run) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+}
+
 static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
@@ -280,6 +292,15 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_num_boids_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	check = gtk_check_button_new_with_label("Walls");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->walls);
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_walls_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
