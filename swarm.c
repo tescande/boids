@@ -1,6 +1,10 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
+void swarm_move(Swarm *swarm)
+{
+}
+
 void swarm_set_num_boids(Swarm *swarm, guint num)
 {
 	GArray *boids = swarm->boids;

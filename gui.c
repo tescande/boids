@@ -9,13 +9,21 @@ typedef struct {
 	cairo_surface_t *surface;
 	cairo_t *cr;
 
+	GThread *thread;
+	GMutex lock;
+	gboolean run;
+
 	Swarm *swarm;
 } BoidsGui;
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 {
+	g_mutex_lock(&gui->lock);
+
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
 	cairo_paint(cr);
+
+	g_mutex_unlock(&gui->lock);
 }
 
 static void draw(BoidsGui *gui)
@@ -57,8 +65,40 @@ static void draw(BoidsGui *gui)
 	}
 }
 
+#define DELAY 20000
+
+static int animate_thread(BoidsGui *gui)
+{
+	GTimer *timer = g_timer_new();
+	gulong elapsed;
+
+	do {
+		g_timer_start(timer);
+		swarm_move(gui->swarm);
+		g_timer_elapsed(timer, &elapsed);
+
+		if (elapsed < DELAY)
+			g_usleep(DELAY - elapsed);
+
+		g_mutex_lock(&gui->lock);
+		draw(gui);
+		g_mutex_unlock(&gui->lock);
+	} while (gui->run);
+
+	return 0;
+}
+
+static gboolean queue_draw(BoidsGui *gui)
+{
+	gtk_widget_queue_draw(gui->drawing_area);
+
+	return gui->run;
+}
+
 static void cairo_init(BoidsGui *gui)
 {
+	g_mutex_lock(&gui->lock);
+
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
 
@@ -68,14 +108,30 @@ static void cairo_init(BoidsGui *gui)
 	gui->cr = cairo_create(gui->surface);
 
 	draw(gui);
+
+	g_mutex_unlock(&gui->lock);
 }
 
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 {
+	if (gui->run) {
+		gui->run = FALSE;
+		gtk_button_set_label(button, "Start");
+		return;
+	}
+
+	gui->run = TRUE;
+	gtk_button_set_label(button, "Stop");
+	gui->thread = g_thread_new("move", (GThreadFunc)animate_thread, gui);
+	g_timeout_add(40, (GSourceFunc)queue_draw, gui);
 }
 
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
+	gui->run = FALSE;
+	if (gui->thread)
+		g_thread_join(gui->thread);
+
 	gtk_main_quit();
 }
 
@@ -133,6 +189,7 @@ int gtk_boids_run(Swarm *swarm)
 
 	gui = g_malloc0(sizeof(*gui));
 	gui->swarm = swarm;
+	g_mutex_init(&gui->lock);
 
 	gtk_init(0, NULL);
 	gui_show(gui);

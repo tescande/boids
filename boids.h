@@ -34,6 +34,8 @@ void swarm_set_num_boids(Swarm *swarm, guint num);
 
 #define swarm_get_boid(swarm, n) (&g_array_index((swarm)->boids, Boid, n))
 
+void swarm_move(Swarm *swarm);
+
 int gtk_boids_run(Swarm *swarm);
 
 #endif /* __BOIDS_H__ */
