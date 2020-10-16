@@ -48,16 +48,16 @@ void swarm_move(Swarm *swarm)
 			if (dist < min_dist)
 				min_dist = dist;
 
-			if (dist < AVOID_DIST) {
+			if (swarm->avoid && dist < AVOID_DIST) {
 				v = b1->pos;
 				vector_sub(&v, &b2->pos);
 				vector_div(&v, dist);
 				vector_add(&avoid, &v);
-			} else if (dist < ALIGN_DIST) {
+			} else if (swarm->align && dist < ALIGN_DIST) {
 				v = b2->velocity;
 				vector_div(&v, dist);
 				vector_add(&align, &v);
-			} else if (dist < COHESION_DIST) {
+			} else if (swarm->cohesion && dist < COHESION_DIST) {
 				cohesion_n++;
 				vector_add(&cohesion, &b2->pos);
 			}

@@ -135,6 +135,21 @@ static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 	gtk_widget_queue_draw(gui->drawing_area);
 }
 
+static void on_avoid_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->avoid = gtk_toggle_button_get_active(button);
+}
+
+static void on_align_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->align = gtk_toggle_button_get_active(button);
+}
+
+static void on_cohesion_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->cohesion = gtk_toggle_button_get_active(button);
+}
+
 static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
@@ -173,6 +188,7 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *spin;
 	GtkWidget *label;
 	GtkWidget *separator;
+	GtkWidget *check;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Boids");
@@ -220,6 +236,27 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_num_boids_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	check = gtk_check_button_new_with_label("Avoid");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->avoid);
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_avoid_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	check = gtk_check_button_new_with_label("Align");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->align);
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_align_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	check = gtk_check_button_new_with_label("Cohesion");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->cohesion);
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_cohesion_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	gtk_widget_show_all(window);
 }

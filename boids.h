@@ -25,6 +25,10 @@ typedef struct {
 
 	gint width;
 	gint height;
+
+	gboolean avoid;
+	gboolean align;
+	gboolean cohesion;
 } Swarm;
 
 Swarm *swarm_alloc(guint num_boids);
