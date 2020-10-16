@@ -18,6 +18,7 @@ void swarm_move(Swarm *swarm)
 	gdouble cos_angle;
 	int cohesion_n;
 	Vector avoid;
+	Vector avoid_obstacle;
 	Vector align;
 	Vector cohesion;
 	Vector v;
@@ -26,6 +27,7 @@ void swarm_move(Swarm *swarm)
 		b1 = swarm_get_boid(swarm, i);
 
 		vector_init(&avoid);
+		vector_init(&avoid_obstacle);
 		vector_init(&align);
 		vector_init(&cohesion);
 		cohesion_n = 0;
@@ -85,6 +87,28 @@ void swarm_move(Swarm *swarm)
 		vector_add(&b1->velocity, &cohesion);
 
 		vector_set_mag(&b1->velocity, 5);
+
+		for (j = 0; j < swarm->obstacles->len; j++) {
+			Vector *obs = swarm_get_obstacle_pos(swarm, j);
+
+			dx = obs->x - b1->pos.x;
+			dy = obs->y - b1->pos.y;
+			if (abs(dx) >= OBSTACLE_RADIUS * 2 || abs(dy) >= OBSTACLE_RADIUS * 2)
+				continue;
+
+			dist = sqrt((dx * dx) + (dy * dy));
+			if (dist < OBSTACLE_RADIUS * 2) {
+				v = b1->pos;
+				vector_sub(&v, obs);
+				vector_div(&v, dist / 4);
+				vector_add(&avoid_obstacle, &v);
+			}
+		}
+
+		if (!vector_is_null(&avoid_obstacle)) {
+			vector_add(&b1->velocity, &avoid_obstacle);
+			vector_set_mag(&b1->velocity, 5);
+		}
 
 		vector_add(&b1->pos, &b1->velocity);
 
