@@ -196,7 +196,7 @@ void swarm_add_walls(Swarm *swarm)
 	if (!swarm->walls)
 		return;
 
-	y = OBSTACLE_RADIUS * 1.5;
+	y = OBSTACLE_RADIUS;
 	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += OBSTACLE_RADIUS) {
 		swarm_add_obstacle(swarm, x, -y, OBSTACLE_FLAG_WALL);
 		swarm_add_obstacle(swarm, x, swarm->height + y, OBSTACLE_FLAG_WALL);
