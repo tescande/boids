@@ -430,8 +430,9 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_debug_vectors_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
-	gui->timing_label = gtk_label_new("");
-	gtk_box_pack_start(GTK_BOX(hbox), gui->timing_label, FALSE, FALSE, 5);
+	label = gtk_label_new("");
+	gui->timing_label = g_object_ref(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 #endif
 
 	gtk_widget_show_all(window);
@@ -450,6 +451,9 @@ int gtk_boids_run(Swarm *swarm)
 
 	gtk_main();
 
+#ifdef BOIDS_DEBUG
+	g_object_unref(gui->timing_label);
+#endif
 	g_object_unref(gui->drawing_area);
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
