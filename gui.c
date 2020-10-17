@@ -341,10 +341,14 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(drawing_area), "draw",
 			 G_CALLBACK(on_draw), gui);
-	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK | GDK_BUTTON_PRESS_MASK);
+	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK |
+					    GDK_BUTTON_PRESS_MASK |
+					    GDK_BUTTON1_MOTION_MASK);
 	g_signal_connect(G_OBJECT(drawing_area), "configure-event",
 			 G_CALLBACK(on_configure_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "button-press-event",
+			 G_CALLBACK(on_mouse_clicked), gui);
+	g_signal_connect(G_OBJECT(drawing_area), "motion-notify-event",
 			 G_CALLBACK(on_mouse_clicked), gui);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
