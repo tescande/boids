@@ -128,13 +128,26 @@ void swarm_move(Swarm *swarm)
 
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags)
 {
-	Obstacle o = {
+	int i;
+	gdouble dx, dy;
+	Obstacle *o;
+	Obstacle new = {
 		.pos.x = x,
 		.pos.y = y,
 		.flags = flags
 	};
 
-	g_array_append_val(swarm->obstacles, o);
+	i = swarm->obstacles->len;
+	while (i--) {
+		o = swarm_get_obstacle(swarm, i);
+		dx = o->pos.x - x;
+		dy = o->pos.y - y;
+		if (abs(dx) < (OBSTACLE_RADIUS >> 1) &&
+		    abs(dy) < (OBSTACLE_RADIUS >> 1))
+			return;
+	}
+
+	g_array_append_val(swarm->obstacles, new);
 }
 
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
