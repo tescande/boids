@@ -4,6 +4,8 @@
 
 #include "boids.h"
 
+#define DEBUG_VECT_FACTOR 20
+
 typedef struct {
 	GtkWidget *drawing_area;
 	cairo_surface_t *surface;
@@ -14,6 +16,11 @@ typedef struct {
 	gboolean run;
 
 	Swarm *swarm;
+
+#ifdef BOIDS_DEBUG
+	GtkWidget *timing_label;
+	gdouble timing;
+#endif
 } BoidsGui;
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
@@ -22,6 +29,64 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
 	cairo_paint(cr);
+
+#ifdef BOIDS_DEBUG
+	if (gui->swarm->debug_vectors) {
+		int i;
+
+		for (i = 0; i < 10 && i < swarm_get_num_boids(gui->swarm); i++) {
+			Boid *b = swarm_get_boid(gui->swarm, i);
+			Vector v = b->pos;
+			Vector avoid, align, cohes, obst, veloc;
+
+			vector_mult2(&b->avoid, DEBUG_VECT_FACTOR, &avoid);
+			vector_mult2(&b->align, DEBUG_VECT_FACTOR, &align);
+			vector_mult2(&b->cohesion, DEBUG_VECT_FACTOR, &cohes);
+			vector_mult2(&b->obstacle, DEBUG_VECT_FACTOR, &obst);
+			vector_mult2(&b->velocity, DEBUG_VECT_FACTOR, &veloc);
+
+			//~ vector_print(&b->pos, "pos");
+			//~ vector_print(&avoid, "avoid");
+			//~ vector_print(&align, "align");
+			//~ vector_print(&cohes, "cohesion");
+			//~ vector_print(&obst, "obstacle");
+			//~ vector_print(&veloc, "velocity");
+
+			cairo_set_line_width(cr, 2);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, avoid.x, avoid.y);
+			cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &avoid);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, align.x, align.y);
+			cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &align);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, cohes.x, cohes.y);
+			cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &cohes);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_set_source_rgba(cr, 1.0, 0.0, 1.0, 1.0);
+			cairo_rel_line_to(cr, obst.x, obst.y);
+			cairo_stroke(cr);
+
+			cairo_move_to(cr, b->pos.x, b->pos.y);
+			cairo_rel_line_to(cr, veloc.x, veloc.y);
+			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+			cairo_stroke(cr);
+		}
+	}
+#endif
 
 	g_mutex_unlock(&gui->lock);
 }
@@ -89,6 +154,10 @@ static int animate_thread(BoidsGui *gui)
 	do {
 		g_timer_start(timer);
 		swarm_move(gui->swarm);
+
+#ifdef BOIDS_DEBUG
+		gui->timing =
+#endif
 		g_timer_elapsed(timer, &elapsed);
 
 		if (elapsed < DELAY)
@@ -104,6 +173,11 @@ static int animate_thread(BoidsGui *gui)
 
 static gboolean queue_draw(BoidsGui *gui)
 {
+#ifdef BOIDS_DEBUG
+	gchar label[32];
+	g_snprintf(label, 32, "%g", gui->timing);
+	gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
+#endif
 	gtk_widget_queue_draw(gui->drawing_area);
 
 	return gui->run;
@@ -213,6 +287,13 @@ static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
 
 	return TRUE;
 }
+
+#ifdef BOIDS_DEBUG
+static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gui->swarm->debug_vectors = gtk_toggle_button_get_active(button);
+}
+#endif
 
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
@@ -334,6 +415,25 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_dead_angle_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+#ifdef BOIDS_DEBUG
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_spacing(GTK_BOX(hbox), 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Debug:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
+
+	check = gtk_check_button_new_with_label("Vectors");
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_debug_vectors_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	gui->timing_label = gtk_label_new("");
+	gtk_box_pack_start(GTK_BOX(hbox), gui->timing_label, FALSE, FALSE, 5);
+#endif
+
 	gtk_widget_show_all(window);
 }
 

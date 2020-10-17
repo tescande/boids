@@ -22,6 +22,13 @@ typedef struct {
 	Vector pos;
 	Vector velocity;
 	gdouble red;
+
+#ifdef BOIDS_DEBUG
+	Vector avoid;
+	Vector align;
+	Vector cohesion;
+	Vector obstacle;
+#endif
 } Boid;
 
 typedef struct {
@@ -45,6 +52,11 @@ typedef struct {
 	gboolean cohesion;
 	gboolean dead_angle;
 	gdouble cos_dead_angle;
+
+#ifdef BOIDS_DEBUG
+	gboolean debug_timing;
+	gboolean debug_vectors;
+#endif
 } Swarm;
 
 static inline gdouble deg2rad(gdouble deg)
