@@ -42,8 +42,8 @@ void swarm_move(Swarm *swarm)
 			/* Avoid a bunch os useless sqrt */
 			dx = b2->pos.x - b1->pos.x;
 			dy = b2->pos.y - b1->pos.y;
-			dist = (dx * dx) + (dy * dy);
-			if (dist >= COHESION_DIST * COHESION_DIST)
+			dist = POW2(dx) + POW2(dy);
+			if (dist >= POW2(COHESION_DIST))
 				continue;
 
 			if (swarm->dead_angle) {
@@ -99,7 +99,7 @@ void swarm_move(Swarm *swarm)
 			if (abs(dx) >= OBSTACLE_RADIUS * 1.5 || abs(dy) >= OBSTACLE_RADIUS * 1.5)
 				continue;
 
-			dist = sqrt((dx * dx) + (dy * dy));
+			dist = sqrt(POW2(dx) + POW2(dy));
 			if (dist < OBSTACLE_RADIUS * 1.5) {
 				v = b1->pos;
 				vector_sub(&v, obs);
@@ -165,8 +165,8 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 	i = swarm->obstacles->len;
 	while (i--) {
 		o = swarm_get_obstacle_pos(swarm, i);
-		dist = pow(o->x - x, 2) + pow(o->y - y, 2);
-		if (dist <= OBSTACLE_RADIUS * OBSTACLE_RADIUS) {
+		dist = POW2(o->x - x) + POW2(o->y - y);
+		if (dist <= POW2(OBSTACLE_RADIUS)) {
 			g_array_remove_index(swarm->obstacles, i);
 			return TRUE;
 		}
