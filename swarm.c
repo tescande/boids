@@ -96,16 +96,16 @@ void swarm_move(Swarm *swarm)
 
 			dx = obs->x - b1->pos.x;
 			dy = obs->y - b1->pos.y;
-			if (abs(dx) >= OBSTACLE_RADIUS * 1.5 || abs(dy) >= OBSTACLE_RADIUS * 1.5)
+			dist = POW2(dx) + POW2(dy);
+			if (dist >= POW2(OBSTACLE_RADIUS * 1.5))
 				continue;
 
-			dist = sqrt(POW2(dx) + POW2(dy));
-			if (dist < OBSTACLE_RADIUS * 1.5) {
-				v = b1->pos;
-				vector_sub(&v, obs);
-				vector_div(&v, dist / 4);
-				vector_add(&avoid_obstacle, &v);
-			}
+			dist = sqrt(dist);
+
+			v = b1->pos;
+			vector_sub(&v, obs);
+			vector_div(&v, dist / 4);
+			vector_add(&avoid_obstacle, &v);
 		}
 
 		if (!vector_is_null(&avoid_obstacle)) {
