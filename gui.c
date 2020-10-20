@@ -11,15 +11,13 @@ typedef struct {
 	cairo_surface_t *surface;
 	cairo_t *cr;
 
-	GThread *thread;
 	GMutex lock;
-	gboolean run;
 
 	Swarm *swarm;
 
 #ifdef BOIDS_DEBUG
 	GtkWidget *timing_label;
-	gdouble timing;
+	gulong compute_time;
 #endif
 } BoidsGui;
 
@@ -146,41 +144,30 @@ static void draw(BoidsGui *gui)
 
 #define DELAY 20000
 
-static int animate_thread(BoidsGui *gui)
+static void animate_cb(BoidsGui *gui, gulong time)
 {
-	GTimer *timer = g_timer_new();
-	gulong elapsed;
-
-	do {
-		g_timer_start(timer);
-		swarm_move(gui->swarm);
+	g_mutex_lock(&gui->lock);
+	draw(gui);
+	g_mutex_unlock(&gui->lock);
 
 #ifdef BOIDS_DEBUG
-		gui->timing =
+	gui->compute_time = time;
 #endif
-		g_timer_elapsed(timer, &elapsed);
 
-		if (elapsed < DELAY)
-			g_usleep(DELAY - elapsed);
-
-		g_mutex_lock(&gui->lock);
-		draw(gui);
-		g_mutex_unlock(&gui->lock);
-	} while (gui->run);
-
-	return 0;
+	if (time < DELAY)
+		g_usleep(DELAY - time);
 }
 
 static gboolean queue_draw(BoidsGui *gui)
 {
 #ifdef BOIDS_DEBUG
 	gchar label[32];
-	g_snprintf(label, 32, "%g", gui->timing);
+	g_snprintf(label, 32, "%2ldms", gui->compute_time / 1000);
 	gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
 #endif
 	gtk_widget_queue_draw(gui->drawing_area);
 
-	return gui->run;
+	return swarm_thread_running(gui->swarm);
 }
 
 static void cairo_init(BoidsGui *gui)
@@ -202,24 +189,24 @@ static void cairo_init(BoidsGui *gui)
 
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 {
-	if (gui->run) {
-		gui->run = FALSE;
+	if (swarm_thread_running(gui->swarm)) {
+		swarm_thread_stop(gui->swarm);
 		gtk_button_set_label(button, "Start");
 		return;
 	}
 
-	gui->run = TRUE;
 	gtk_button_set_label(button, "Stop");
-	gui->thread = g_thread_new("move", (GThreadFunc)animate_thread, gui);
+	swarm_thread_start(gui->swarm, (SwarmAnimateFunc)animate_cb, gui);
 	g_timeout_add(40, (GSourceFunc)queue_draw, gui);
 }
 
 static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 {
-	if (gui->run)
+	if (swarm_thread_running(gui->swarm))
 		return;
 
-	animate_thread(gui);
+	swarm_move(gui->swarm);
+	draw(gui);
 	gtk_widget_queue_draw(gui->drawing_area);
 }
 
@@ -244,7 +231,7 @@ static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 	swarm_add_walls(gui->swarm);
 
-	if (!gui->run) {
+	if (!swarm_thread_running(gui->swarm)) {
 		draw(gui);
 		gtk_widget_queue_draw(gui->drawing_area);
 	}
@@ -254,7 +241,7 @@ static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 
-	if (!gui->run) {
+	if (!swarm_thread_running(gui->swarm)) {
 		draw(gui);
 		gtk_widget_queue_draw(gui->drawing_area);
 	}
@@ -280,7 +267,7 @@ static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
 	else
 		redraw = swarm_remove_obstacle(gui->swarm, event->x, event->y);
 
-	if (!gui->run && redraw) {
+	if (!swarm_thread_running(gui->swarm) && redraw) {
 		draw(gui);
 		gtk_widget_queue_draw(gui->drawing_area);
 	}
@@ -297,9 +284,7 @@ static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
-	gui->run = FALSE;
-	if (gui->thread)
-		g_thread_join(gui->thread);
+	swarm_thread_stop(gui->swarm);
 
 	gtk_main_quit();
 }

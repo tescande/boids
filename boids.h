@@ -38,7 +38,11 @@ typedef struct {
 
 #define OBSTACLE_FLAG_WALL 0x01
 
-typedef struct {
+typedef struct _Swarm Swarm;
+
+typedef void (*SwarmAnimateFunc)(Swarm *swarm, gulong time);
+
+typedef struct _Swarm {
 	GArray *boids;
 	GArray *obstacles;
 
@@ -52,6 +56,11 @@ typedef struct {
 	gboolean cohesion;
 	gboolean dead_angle;
 	gdouble cos_dead_angle;
+
+	GThread  *move_th;
+	gboolean move_th_running;
+	SwarmAnimateFunc animate_cb;
+	gpointer animate_cb_userdata;
 
 #ifdef BOIDS_DEBUG
 	gboolean debug_timing;
@@ -93,6 +102,10 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
 void swarm_remove_walls(Swarm *swarm);
 void swarm_add_walls(Swarm *swarm);
+
+void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
+void swarm_thread_stop(Swarm *swarm);
+gboolean swarm_thread_running(Swarm *swarm);
 
 void swarm_move(Swarm *swarm);
 
