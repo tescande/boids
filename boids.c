@@ -31,7 +31,9 @@ int main(int argc, char **argv)
 	if (seed)
 		g_random_set_seed(seed);
 
-	swarm = swarm_alloc(num_boids, walls);
+	swarm = swarm_alloc();
+	swarm_set_num_boids(swarm, num_boids);
+	swarm_walls_set_enable(swarm, walls);
 
 	gtk_boids_run(swarm);
 

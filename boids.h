@@ -87,7 +87,7 @@ static inline gdouble rad2deg(gdouble rad)
 
 #define POW2(v) ((v) * (v))
 
-Swarm *swarm_alloc(guint num_boids, gboolean walls);
+Swarm *swarm_alloc(void);
 void swarm_free(Swarm *swarm);
 
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);

@@ -372,22 +372,20 @@ void swarm_free(Swarm *swarm)
 	g_free(swarm);
 }
 
-Swarm *swarm_alloc(guint num_boids, gboolean walls)
+Swarm *swarm_alloc(void)
 {
 	Swarm *swarm;
 
 	swarm = g_malloc0(sizeof(Swarm));
+
 	swarm->width = DEFAULT_WIDTH;
 	swarm->height = DEFAULT_HEIGHT;
 
 	swarm->boids = g_array_new(FALSE, FALSE, sizeof(Boid));
-
-	swarm_set_num_boids(swarm, num_boids);
-	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
-
 	swarm->obstacles = g_array_new(FALSE, FALSE, sizeof(Obstacle));
 
-	swarm_walls_set_enable(swarm, walls);
+	swarm_set_num_boids(swarm, DEFAULT_NUM_BOIDS);
+	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
 
 	return swarm;
 }
