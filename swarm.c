@@ -258,7 +258,7 @@ void swarm_get_sizes(Swarm *swarm, gint *width, gint *height)
 	*height = swarm->height;
 }
 
-void swarm_update_sizes(Swarm *swarm, guint width, guint height)
+void swarm_set_sizes(Swarm *swarm, guint width, guint height)
 {
 	if (swarm->width == width && swarm->height == height)
 		return;

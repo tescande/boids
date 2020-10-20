@@ -84,7 +84,7 @@ Swarm *swarm_alloc(guint num_boids, gboolean walls);
 void swarm_free(Swarm *swarm);
 
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);
-void swarm_update_sizes(Swarm *swarm, guint width, guint height);
+void swarm_set_sizes(Swarm *swarm, guint width, guint height);
 
 #define swarm_get_num_boids(swarm) ((swarm)->boids->len)
 void swarm_set_num_boids(Swarm *swarm, guint num);
