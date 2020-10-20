@@ -172,14 +172,18 @@ static gboolean queue_draw(BoidsGui *gui)
 
 static void cairo_init(BoidsGui *gui)
 {
+	gint width;
+	gint height;
+
+	swarm_get_sizes(gui->swarm, &width, &height);
+
 	g_mutex_lock(&gui->lock);
 
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
 
 	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-						  gui->swarm->width,
-						  gui->swarm->height);
+						  width, height);
 	gui->cr = cairo_create(gui->surface);
 
 	draw(gui);
@@ -309,6 +313,8 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *label;
 	GtkWidget *separator;
 	GtkWidget *check;
+	gint width;
+	gint height;
 
 	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_title(GTK_WINDOW(window), "Boids");
@@ -322,7 +328,8 @@ static void gui_show(BoidsGui *gui)
 
 	drawing_area = gtk_drawing_area_new();
 	gui->drawing_area = g_object_ref(drawing_area);
-	gtk_widget_set_size_request(drawing_area, gui->swarm->width, gui->swarm->height);
+	swarm_get_sizes(gui->swarm, &width, &height);
+	gtk_widget_set_size_request(drawing_area, width, height);
 	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(drawing_area), "draw",
 			 G_CALLBACK(on_draw), gui);
