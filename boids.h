@@ -68,6 +68,13 @@ typedef struct _Swarm {
 #endif
 } Swarm;
 
+typedef enum {
+	RULE_AVOID,
+	RULE_ALIGN,
+	RULE_COHESION,
+	RULE_DEAD_ANGLE,
+} SwarmRule;
+
 static inline gdouble deg2rad(gdouble deg)
 {
 	return deg * G_PI / 180;
@@ -85,6 +92,9 @@ void swarm_free(Swarm *swarm);
 
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);
 void swarm_set_sizes(Swarm *swarm, guint width, guint height);
+
+gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule);
+void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active);
 
 #define swarm_get_num_boids(swarm) ((swarm)->boids->len)
 void swarm_set_num_boids(Swarm *swarm, guint num);

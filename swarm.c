@@ -269,6 +269,46 @@ void swarm_set_sizes(Swarm *swarm, guint width, guint height)
 	swarm_add_walls(swarm);
 }
 
+void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active)
+{
+	switch (rule) {
+	case RULE_AVOID:
+		swarm->avoid = active;
+		break;
+	case RULE_ALIGN:
+		swarm->align = active;
+		break;
+	case RULE_COHESION:
+		swarm->cohesion = active;
+		break;
+	case RULE_DEAD_ANGLE:
+		swarm->dead_angle = active;
+		break;
+	}
+}
+
+gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule)
+{
+	gboolean active;
+
+	switch (rule) {
+	case RULE_AVOID:
+		active = swarm->avoid;
+		break;
+	case RULE_ALIGN:
+		active = swarm->align;
+		break;
+	case RULE_COHESION:
+		active = swarm->cohesion;
+		break;
+	case RULE_DEAD_ANGLE:
+		active = swarm->dead_angle;
+		break;
+	}
+
+	return active;
+}
+
 static int swarm_move_thread(Swarm *swarm)
 {
 	GTimer *timer = g_timer_new();

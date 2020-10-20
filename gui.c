@@ -216,17 +216,23 @@ static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 
 static void on_avoid_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->avoid = gtk_toggle_button_get_active(button);
+	gboolean active = gtk_toggle_button_get_active(button);
+
+	swarm_rule_set_active(gui->swarm, RULE_AVOID, active);
 }
 
 static void on_align_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->align = gtk_toggle_button_get_active(button);
+	gboolean active = gtk_toggle_button_get_active(button);
+
+	swarm_rule_set_active(gui->swarm, RULE_ALIGN, active);
 }
 
 static void on_cohesion_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->cohesion = gtk_toggle_button_get_active(button);
+	gboolean active = gtk_toggle_button_get_active(button);
+
+	swarm_rule_set_active(gui->swarm, RULE_COHESION, active);
 }
 
 static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
@@ -313,6 +319,7 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *label;
 	GtkWidget *separator;
 	GtkWidget *check;
+	gboolean active;
 	gint width;
 	gint height;
 
@@ -383,25 +390,29 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
 
 	check = gtk_check_button_new_with_label("Avoid");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->avoid);
+	active = swarm_rule_get_active(gui->swarm, RULE_AVOID);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), active);
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_avoid_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	check = gtk_check_button_new_with_label("Align");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->align);
+	active = swarm_rule_get_active(gui->swarm, RULE_ALIGN);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), active);
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_align_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	check = gtk_check_button_new_with_label("Cohesion");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->cohesion);
+	active = swarm_rule_get_active(gui->swarm, RULE_COHESION);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), active);
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_cohesion_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	check = gtk_check_button_new_with_label("FoV Dead Angle");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->cohesion);
+	active = swarm_rule_get_active(gui->swarm, RULE_DEAD_ANGLE);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), active);
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_dead_angle_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
