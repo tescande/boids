@@ -304,7 +304,7 @@ void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active)
 
 gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule)
 {
-	gboolean active;
+	gboolean active = FALSE;
 
 	switch (rule) {
 	case RULE_AVOID:
