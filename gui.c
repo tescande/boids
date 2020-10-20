@@ -237,9 +237,7 @@ static void on_cohesion_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->walls = gtk_toggle_button_get_active(button);
-
-	swarm_add_walls(gui->swarm);
+	swarm_walls_set_enable(gui->swarm, gtk_toggle_button_get_active(button));
 
 	if (!swarm_thread_running(gui->swarm)) {
 		draw(gui);
@@ -381,7 +379,8 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
 
 	check = gtk_check_button_new_with_label("Walls");
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check), gui->swarm->walls);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				     swarm_walls_get_enable(gui->swarm));
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_walls_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);

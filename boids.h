@@ -96,6 +96,9 @@ void swarm_set_sizes(Swarm *swarm, guint width, guint height);
 gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule);
 void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active);
 
+gboolean swarm_walls_get_enable(Swarm *swarm);
+void swarm_walls_set_enable(Swarm *swarm, gboolean enable);
+
 #define swarm_get_num_boids(swarm) ((swarm)->boids->len)
 void swarm_set_num_boids(Swarm *swarm, guint num);
 
@@ -110,9 +113,6 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 #define swarm_get_obstacle(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_get_obstacle_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
 #define swarm_get_obstacle_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
-
-void swarm_remove_walls(Swarm *swarm);
-void swarm_add_walls(Swarm *swarm);
 
 void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
 void swarm_thread_stop(Swarm *swarm);

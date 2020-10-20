@@ -175,7 +175,7 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 	return FALSE;
 }
 
-void swarm_remove_walls(Swarm *swarm)
+static void swarm_remove_walls(Swarm *swarm)
 {
 	GArray *obstacles = swarm->obstacles;
 	guint flags;
@@ -190,14 +190,11 @@ void swarm_remove_walls(Swarm *swarm)
 	}
 }
 
-void swarm_add_walls(Swarm *swarm)
+static void swarm_add_walls(Swarm *swarm)
 {
 	gint x, y;
 
 	swarm_remove_walls(swarm);
-
-	if (!swarm->walls)
-		return;
 
 	y = OBSTACLE_RADIUS;
 	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += OBSTACLE_RADIUS) {
@@ -210,6 +207,21 @@ void swarm_add_walls(Swarm *swarm)
 		swarm_add_obstacle(swarm, -x, y, OBSTACLE_FLAG_WALL);
 		swarm_add_obstacle(swarm, swarm->width + x, y, OBSTACLE_FLAG_WALL);
 	}
+}
+
+gboolean swarm_walls_get_enable(Swarm *swarm)
+{
+	return swarm->walls;
+}
+
+void swarm_walls_set_enable(Swarm *swarm, gboolean enable)
+{
+	swarm->walls = enable;
+
+	if (enable)
+		swarm_add_walls(swarm);
+	else
+		swarm_remove_walls(swarm);
 }
 
 guint swarm_get_dead_angle(Swarm *swarm)
@@ -266,7 +278,10 @@ void swarm_set_sizes(Swarm *swarm, guint width, guint height)
 	swarm->width = width;
 	swarm->height = height;
 
-	swarm_add_walls(swarm);
+	if (swarm->walls) {
+		swarm_remove_walls(swarm);
+		swarm_add_walls(swarm);
+	}
 }
 
 void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active)
@@ -372,8 +387,7 @@ Swarm *swarm_alloc(guint num_boids, gboolean walls)
 
 	swarm->obstacles = g_array_new(FALSE, FALSE, sizeof(Obstacle));
 
-	swarm->walls = walls;
-	swarm_add_walls(swarm);
+	swarm_walls_set_enable(swarm, walls);
 
 	return swarm;
 }
