@@ -95,7 +95,7 @@ static void draw_obstacles(BoidsGui *gui)
 
 	cairo_set_source_rgba(gui->cr, 0.3, 0.3, 0.3, 1.0);
 	for (i = 0; i < gui->swarm->obstacles->len; i++) {
-		Vector *o = swarm_get_obstacle_pos(gui->swarm, i);
+		Vector *o = swarm_obstacle_get_pos(gui->swarm, i);
 		cairo_arc(gui->cr, o->x, o->y, OBSTACLE_RADIUS, 0, 2 * G_PI);
 		cairo_fill(gui->cr);
 	}

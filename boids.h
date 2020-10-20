@@ -110,9 +110,9 @@ void swarm_set_dead_angle(Swarm *swarm, guint angle);
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
-#define swarm_get_obstacle(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
-#define swarm_get_obstacle_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
-#define swarm_get_obstacle_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
+#define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
+#define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
+#define swarm_obstacle_get_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
 
 void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
 void swarm_thread_stop(Swarm *swarm);

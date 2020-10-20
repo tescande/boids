@@ -92,7 +92,7 @@ void swarm_move(Swarm *swarm)
 		vector_set_mag(&b1->velocity, 5);
 
 		for (j = 0; j < swarm->obstacles->len; j++) {
-			Vector *obs = swarm_get_obstacle_pos(swarm, j);
+			Vector *obs = swarm_obstacle_get_pos(swarm, j);
 
 			dx = obs->x - b1->pos.x;
 			dy = obs->y - b1->pos.y;
@@ -142,7 +142,7 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags)
 
 	i = swarm->obstacles->len;
 	while (i--) {
-		o = swarm_get_obstacle(swarm, i);
+		o = swarm_obstacle_get(swarm, i);
 		dx = o->pos.x - x;
 		dy = o->pos.y - y;
 		if (abs(dx) < (OBSTACLE_RADIUS >> 1) &&
@@ -164,7 +164,7 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 
 	i = swarm->obstacles->len;
 	while (i--) {
-		o = swarm_get_obstacle_pos(swarm, i);
+		o = swarm_obstacle_get_pos(swarm, i);
 		dist = POW2(o->x - x) + POW2(o->y - y);
 		if (dist <= POW2(OBSTACLE_RADIUS)) {
 			g_array_remove_index(swarm->obstacles, i);
@@ -183,7 +183,7 @@ static void swarm_remove_walls(Swarm *swarm)
 
 	i = obstacles->len;
 	while (i--) {
-		flags = swarm_get_obstacle_flags(swarm, i);
+		flags = swarm_obstacle_get_flags(swarm, i);
 
 		if ((flags & OBSTACLE_FLAG_WALL) == OBSTACLE_FLAG_WALL)
 			g_array_remove_index(obstacles, i);
