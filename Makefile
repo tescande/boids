@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 CC = gcc
-CFLAGS = -g -Wall `pkg-config --cflags gtk+-3.0`
+CFLAGS = -Wall -O3 `pkg-config --cflags gtk+-3.0`
 LINKFLAGS = `pkg-config --libs gtk+-3.0` -lm
 INCS = boids.h vector.h
 SRCS = boids.c swarm.c gui.c
