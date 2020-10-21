@@ -208,7 +208,7 @@ static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 
 	gtk_button_set_label(button, "Stop");
 	swarm_thread_start(gui->swarm, (SwarmAnimateFunc)animate_cb, gui);
-	g_timeout_add(40, (GSourceFunc)queue_draw, gui);
+	g_timeout_add(10, (GSourceFunc)queue_draw, gui);
 }
 
 static void on_step_clicked(GtkButton *button, BoidsGui *gui)
