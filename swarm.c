@@ -89,7 +89,7 @@ void swarm_move(Swarm *swarm)
 		vector_add(&b1->velocity, &align);
 		vector_add(&b1->velocity, &cohesion);
 
-		vector_set_mag(&b1->velocity, 5);
+		vector_set_mag(&b1->velocity, 4.0);
 
 		for (j = 0; j < swarm->obstacles->len; j++) {
 			Vector *obs = swarm_obstacle_get_pos(swarm, j);
@@ -110,7 +110,7 @@ void swarm_move(Swarm *swarm)
 
 		if (!vector_is_null(&avoid_obstacle)) {
 			vector_add(&b1->velocity, &avoid_obstacle);
-			vector_set_mag(&b1->velocity, 5);
+			vector_set_mag(&b1->velocity, 4.0);
 		}
 
 		vector_add(&b1->pos, &b1->velocity);
