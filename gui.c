@@ -146,16 +146,23 @@ static void draw(BoidsGui *gui)
 
 static void animate_cb(BoidsGui *gui, gulong time)
 {
+	GTimer *timer = g_timer_new();
+	gulong elapsed;
+
+	g_timer_start(timer);
+
 	g_mutex_lock(&gui->lock);
 	draw(gui);
 	g_mutex_unlock(&gui->lock);
 
+	g_timer_elapsed(timer, &elapsed);
+
 #ifdef BOIDS_DEBUG
-	gui->compute_time = time;
+	gui->compute_time = time + elapsed;
 #endif
 
-	if (time < DELAY)
-		g_usleep(DELAY - time);
+	if (time + elapsed < DELAY)
+		g_usleep(DELAY - time - elapsed);
 }
 
 static gboolean queue_draw(BoidsGui *gui)
