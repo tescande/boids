@@ -360,11 +360,13 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
 	button = gtk_button_new_with_label("Start");
+	gtk_widget_set_size_request(GTK_WIDGET(button), 68, -1);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_start_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
 
 	button = gtk_button_new_with_label("Step");
+	gtk_widget_set_size_request(GTK_WIDGET(button), 68, -1);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_step_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
