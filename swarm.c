@@ -197,13 +197,13 @@ static void swarm_add_walls(Swarm *swarm)
 	swarm_remove_walls(swarm);
 
 	y = OBSTACLE_RADIUS;
-	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += OBSTACLE_RADIUS) {
+	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += (OBSTACLE_RADIUS >> 1)) {
 		swarm_add_obstacle(swarm, x, -y, OBSTACLE_FLAG_WALL);
 		swarm_add_obstacle(swarm, x, swarm->height + y, OBSTACLE_FLAG_WALL);
 	}
 
 	x = y;
-	for (y = 0; y < swarm->height + OBSTACLE_RADIUS; y += OBSTACLE_RADIUS) {
+	for (y = 0; y < swarm->height + OBSTACLE_RADIUS; y += (OBSTACLE_RADIUS >> 1)) {
 		swarm_add_obstacle(swarm, -x, y, OBSTACLE_FLAG_WALL);
 		swarm_add_obstacle(swarm, swarm->width + x, y, OBSTACLE_FLAG_WALL);
 	}
