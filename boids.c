@@ -1,6 +1,4 @@
 /* SPDX-License-Identifier: MIT */
-#include <stdlib.h>
-
 #include "boids.h"
 
 int main(int argc, char **argv)
