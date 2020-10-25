@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
-#define AVOID_DIST 25
-#define ALIGN_DIST 120
-#define COHESION_DIST 200
+#define AVOID_DIST 40
+#define ALIGN_DIST 150
+#define COHESION_DIST 250
 #define PROXIMITY_DIST 30
 
 void swarm_move(Swarm *swarm)
