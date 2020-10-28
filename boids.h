@@ -18,6 +18,20 @@
 
 #define OBSTACLE_RADIUS 20
 
+#define AVOID_DIST_DFLT 40
+#define AVOID_DIST_MIN   5
+#define AVOID_DIST_MAX  50
+
+#define ALIGN_DIST_DFLT 150
+#define ALIGN_DIST_MIN   80
+#define ALIGN_DIST_MAX  250
+
+#define COHESION_DIST_DFLT 250
+#define COHESION_DIST_MIN  150
+#define COHESION_DIST_MAX  450
+
+#define PROXIMITY_DIST 30
+
 typedef struct {
 	Vector pos;
 	Vector velocity;
@@ -56,6 +70,10 @@ typedef struct _Swarm {
 	gboolean cohesion;
 	gboolean dead_angle;
 	gdouble cos_dead_angle;
+
+	guint avoid_dist;
+	guint align_dist;
+	guint cohesion_dist;
 
 	GThread  *move_th;
 	gboolean move_th_running;

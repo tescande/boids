@@ -1,11 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
-#define AVOID_DIST 40
-#define ALIGN_DIST 150
-#define COHESION_DIST 250
-#define PROXIMITY_DIST 30
-
 void swarm_move(Swarm *swarm)
 {
 	int i;
@@ -43,7 +38,7 @@ void swarm_move(Swarm *swarm)
 			dx = b2->pos.x - b1->pos.x;
 			dy = b2->pos.y - b1->pos.y;
 			dist = POW2(dx) + POW2(dy);
-			if (dist >= POW2(COHESION_DIST))
+			if (dist >= POW2(swarm->cohesion_dist))
 				continue;
 
 			if (swarm->dead_angle) {
@@ -59,16 +54,16 @@ void swarm_move(Swarm *swarm)
 			if (dist < min_dist)
 				min_dist = dist;
 
-			if (swarm->avoid && dist < AVOID_DIST) {
+			if (swarm->avoid && dist < swarm->avoid_dist) {
 				v = b1->pos;
 				vector_sub(&v, &b2->pos);
 				vector_div(&v, dist);
 				vector_add(&avoid, &v);
-			} else if (swarm->align && dist < ALIGN_DIST) {
+			} else if (swarm->align && dist < swarm->align_dist) {
 				v = b2->velocity;
 				vector_div(&v, dist);
 				vector_add(&align, &v);
-			} else if (swarm->cohesion && dist < COHESION_DIST) {
+			} else if (swarm->cohesion && dist < swarm->cohesion_dist) {
 				cohesion_n++;
 				vector_add(&cohesion, &b2->pos);
 			}
@@ -386,6 +381,10 @@ Swarm *swarm_alloc(void)
 
 	swarm_set_num_boids(swarm, DEFAULT_NUM_BOIDS);
 	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
+
+	swarm->avoid_dist = AVOID_DIST_DFLT;
+	swarm->align_dist = ALIGN_DIST_DFLT;
+	swarm->cohesion_dist = COHESION_DIST_DFLT;
 
 	return swarm;
 }
