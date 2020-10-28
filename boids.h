@@ -90,6 +90,9 @@ static inline gdouble rad2deg(gdouble rad)
 Swarm *swarm_alloc(void);
 void swarm_free(Swarm *swarm);
 
+#define swarm_show_debug_vectors(swarm) ((swarm)->debug_vectors)
+#define swarm_set_debug_vectors(swarm, en) ((swarm)->debug_vectors = (en))
+
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);
 void swarm_set_sizes(Swarm *swarm, guint width, guint height);
 

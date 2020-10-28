@@ -29,7 +29,7 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 	cairo_paint(cr);
 
 #ifdef BOIDS_DEBUG
-	if (gui->swarm->debug_vectors) {
+	if (swarm_show_debug_vectors(gui->swarm)) {
 		int i;
 
 		for (i = 0; i < 10 && i < swarm_get_num_boids(gui->swarm); i++) {
@@ -294,7 +294,7 @@ static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
 #ifdef BOIDS_DEBUG
 static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->debug_vectors = gtk_toggle_button_get_active(button);
+	swarm_set_debug_vectors(gui->swarm, gtk_toggle_button_get_active(button));
 }
 #endif
 
