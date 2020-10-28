@@ -113,14 +113,12 @@ void swarm_move(Swarm *swarm)
 		b1->pos.x = fmod(b1->pos.x + swarm->width, swarm->width);
 		b1->pos.y = fmod(b1->pos.y + swarm->height, swarm->height);
 
-#ifdef BOIDS_DEBUG
 		if (swarm->debug_vectors) {
 			b1->avoid = avoid;
 			b1->align = align;
 			b1->cohesion = cohesion;
 			b1->obstacle = avoid_obstacle;
 		}
-#endif
 	}
 }
 
@@ -440,6 +438,8 @@ Swarm *swarm_alloc(void)
 	swarm->avoid_dist = AVOID_DIST_DFLT;
 	swarm->align_dist = ALIGN_DIST_DFLT;
 	swarm->cohesion_dist = COHESION_DIST_DFLT;
+
+	swarm->debug_controls = FALSE;
 
 	return swarm;
 }

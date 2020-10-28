@@ -7,6 +7,7 @@ int main(int argc, char **argv)
 	int num_boids = DEFAULT_NUM_BOIDS;
 	int seed = 0;
 	gboolean walls = FALSE;
+	gboolean debug = FALSE;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry entries[] = {
@@ -15,6 +16,8 @@ int main(int argc, char **argv)
 		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
 		  "Add walls to the field", NULL },
 		{ "rand-seed", 's', 0, G_OPTION_ARG_INT, &seed,
+		  "Random seed value", "VAL" },
+		{ "debug-controls", 'd', 0, G_OPTION_ARG_NONE, &debug,
 		  "Random seed value", "VAL" },
 		{ NULL }
 	};
@@ -30,6 +33,7 @@ int main(int argc, char **argv)
 		g_random_set_seed(seed);
 
 	swarm = swarm_alloc();
+	swarm_set_debug_controls(swarm, debug);
 	swarm_set_num_boids(swarm, num_boids);
 	swarm_walls_set_enable(swarm, walls);
 

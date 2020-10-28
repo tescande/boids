@@ -37,12 +37,11 @@ typedef struct {
 	Vector velocity;
 	gdouble red;
 
-#ifdef BOIDS_DEBUG
+	/* For debugging purpose */
 	Vector avoid;
 	Vector align;
 	Vector cohesion;
 	Vector obstacle;
-#endif
 } Boid;
 
 typedef struct {
@@ -80,10 +79,9 @@ typedef struct _Swarm {
 	SwarmAnimateFunc animate_cb;
 	gpointer animate_cb_userdata;
 
-#ifdef BOIDS_DEBUG
+	gboolean debug_controls;
 	gboolean debug_timing;
 	gboolean debug_vectors;
-#endif
 } Swarm;
 
 typedef enum {
@@ -110,6 +108,9 @@ void swarm_free(Swarm *swarm);
 
 #define swarm_show_debug_vectors(swarm) ((swarm)->debug_vectors)
 #define swarm_set_debug_vectors(swarm, en) ((swarm)->debug_vectors = (en))
+
+#define swarm_show_debug_controls(swarm) ((swarm)->debug_controls)
+#define swarm_set_debug_controls(swarm, en) ((swarm)->debug_controls = (en))
 
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);
 void swarm_set_sizes(Swarm *swarm, guint width, guint height);

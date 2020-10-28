@@ -15,10 +15,8 @@ typedef struct {
 
 	Swarm *swarm;
 
-#ifdef BOIDS_DEBUG
 	GtkWidget *timing_label;
 	gulong compute_time;
-#endif
 } BoidsGui;
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
@@ -28,7 +26,6 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
 	cairo_paint(cr);
 
-#ifdef BOIDS_DEBUG
 	if (swarm_show_debug_vectors(gui->swarm)) {
 		int i;
 
@@ -84,7 +81,6 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 			cairo_stroke(cr);
 		}
 	}
-#endif
 
 	g_mutex_unlock(&gui->lock);
 }
@@ -157,9 +153,7 @@ static void animate_cb(BoidsGui *gui, gulong time)
 
 	g_timer_elapsed(timer, &elapsed);
 
-#ifdef BOIDS_DEBUG
 	gui->compute_time = time + elapsed;
-#endif
 
 	if (time + elapsed < DELAY)
 		g_usleep(DELAY - time - elapsed);
@@ -167,11 +161,12 @@ static void animate_cb(BoidsGui *gui, gulong time)
 
 static gboolean queue_draw(BoidsGui *gui)
 {
-#ifdef BOIDS_DEBUG
-	gchar label[32];
-	g_snprintf(label, 32, "%2ldms", gui->compute_time / 1000);
-	gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
-#endif
+	if (swarm_show_debug_controls(gui->swarm)) {
+		gchar label[32];
+		g_snprintf(label, 32, "%2ldms", gui->compute_time / 1000);
+		gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
+	}
+
 	gtk_widget_queue_draw(gui->drawing_area);
 
 	return swarm_thread_running(gui->swarm);
@@ -291,7 +286,6 @@ static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
 	return TRUE;
 }
 
-#ifdef BOIDS_DEBUG
 static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
 	swarm_set_debug_vectors(gui->swarm, gtk_toggle_button_get_active(button));
@@ -312,8 +306,6 @@ static void on_cohesion_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
 	swarm_set_rule_dist(gui->swarm, RULE_COHESION, gtk_spin_button_get_value_as_int(spin));
 }
 
-#endif
-
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	swarm_thread_stop(gui->swarm);
@@ -330,7 +322,6 @@ static gboolean on_configure_event(GtkWidget *widget, GdkEventConfigure *event,
 	return FALSE;
 }
 
-#ifdef BOIDS_DEBUG
 static void gui_show_debug_controls(BoidsGui *gui, GtkWidget *vbox)
 {
 	GtkWidget *hbox;
@@ -382,7 +373,6 @@ static void gui_show_debug_controls(BoidsGui *gui, GtkWidget *vbox)
 	gui->timing_label = g_object_ref(label);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 }
-#endif /* BOIDS_DEBUG */
 
 static void gui_show(BoidsGui *gui)
 {
@@ -502,9 +492,8 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_dead_angle_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 
-#ifdef BOIDS_DEBUG
-	gui_show_debug_controls(gui, vbox);
-#endif
+	if (swarm_show_debug_controls(gui->swarm))
+		gui_show_debug_controls(gui, vbox);
 
 	gtk_widget_show_all(window);
 }
