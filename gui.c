@@ -296,6 +296,22 @@ static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
 	swarm_set_debug_vectors(gui->swarm, gtk_toggle_button_get_active(button));
 }
+
+static void on_avoid_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_rule_dist(gui->swarm, RULE_AVOID, gtk_spin_button_get_value_as_int(spin));
+}
+
+static void on_align_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_rule_dist(gui->swarm, RULE_ALIGN, gtk_spin_button_get_value_as_int(spin));
+}
+
+static void on_cohesion_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_rule_dist(gui->swarm, RULE_COHESION, gtk_spin_button_get_value_as_int(spin));
+}
+
 #endif
 
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
@@ -445,6 +461,33 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_debug_vectors_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Avoid dist:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(AVOID_DIST_MIN, AVOID_DIST_MAX, 1);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_rule_dist(gui->swarm, RULE_AVOID));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_avoid_dist_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Align dist:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(ALIGN_DIST_MIN, ALIGN_DIST_MAX, 1);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_rule_dist(gui->swarm, RULE_ALIGN));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_align_dist_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Cohesion dist:");
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(COHESION_DIST_MIN, COHESION_DIST_MAX, 1);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_rule_dist(gui->swarm, RULE_COHESION));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_cohesion_dist_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 
 	label = gtk_label_new("");
 	gui->timing_label = g_object_ref(label);
