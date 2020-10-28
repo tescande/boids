@@ -116,6 +116,7 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 #define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
 #define swarm_obstacle_get_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
+#define swarm_num_obstacles(swarm) ((swarm)->obstacles->len)
 
 void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
 void swarm_thread_stop(Swarm *swarm);
