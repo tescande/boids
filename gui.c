@@ -264,7 +264,8 @@ static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 
 static void on_dead_angle_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
-	gui->swarm->dead_angle = gtk_toggle_button_get_active(button);
+	swarm_rule_set_active(gui->swarm, RULE_DEAD_ANGLE,
+			      gtk_toggle_button_get_active(button));
 }
 
 static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
