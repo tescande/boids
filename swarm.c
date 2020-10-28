@@ -319,6 +319,61 @@ gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule)
 	return active;
 }
 
+void swarm_set_rule_dist(Swarm *swarm, SwarmRule rule, guint dist)
+{
+	guint d = dist;
+
+	switch (rule) {
+	case RULE_AVOID:
+		if (d < AVOID_DIST_MIN)
+			d = AVOID_DIST_MIN;
+		else if (d > AVOID_DIST_MAX)
+			d = AVOID_DIST_MAX;
+
+		swarm->avoid_dist = d;
+		break;
+	case RULE_ALIGN:
+		if (d < ALIGN_DIST_MIN)
+			d = ALIGN_DIST_MIN;
+		else if (d > ALIGN_DIST_MAX)
+			d = ALIGN_DIST_MAX;
+
+		swarm->align_dist = dist;
+		break;
+	case RULE_COHESION:
+		if (d < COHESION_DIST_MIN)
+			d = COHESION_DIST_MIN;
+		else if (d > COHESION_DIST_MAX)
+			d = COHESION_DIST_MAX;
+
+		swarm->cohesion_dist = d;
+		break;
+	default:
+		break;
+	}
+}
+
+guint swarm_get_rule_dist(Swarm *swarm, SwarmRule rule)
+{
+	guint dist = 0;
+
+	switch (rule) {
+	case RULE_AVOID:
+		dist = swarm->avoid_dist;
+		break;
+	case RULE_ALIGN:
+		dist = swarm->align_dist;
+		break;
+	case RULE_COHESION:
+		dist = swarm->cohesion_dist;
+		break;
+	default:
+		break;
+	}
+
+	return dist;
+}
+
 static int swarm_move_thread(Swarm *swarm)
 {
 	GTimer *timer = g_timer_new();

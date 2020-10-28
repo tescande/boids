@@ -117,6 +117,9 @@ void swarm_set_sizes(Swarm *swarm, guint width, guint height);
 gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule);
 void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active);
 
+guint swarm_get_rule_dist(Swarm *swarm, SwarmRule rule);
+void swarm_set_rule_dist(Swarm *swarm, SwarmRule rule, guint dist);
+
 gboolean swarm_walls_get_enable(Swarm *swarm);
 void swarm_walls_set_enable(Swarm *swarm, gboolean enable);
 
