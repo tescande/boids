@@ -122,7 +122,7 @@ void swarm_move(Swarm *swarm)
 	}
 }
 
-void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags)
+void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 {
 	int i;
 	gdouble dx, dy;
@@ -130,7 +130,7 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags)
 	Obstacle new = {
 		.pos.x = x,
 		.pos.y = y,
-		.flags = flags
+		.type = type,
 	};
 
 	i = swarm->obstacles->len;
@@ -171,14 +171,14 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 static void swarm_remove_walls(Swarm *swarm)
 {
 	GArray *obstacles = swarm->obstacles;
-	guint flags;
+	guint type;
 	gint i;
 
 	i = obstacles->len;
 	while (i--) {
-		flags = swarm_obstacle_get_flags(swarm, i);
+		type = swarm_obstacle_get_type(swarm, i);
 
-		if ((flags & OBSTACLE_FLAG_WALL) == OBSTACLE_FLAG_WALL)
+		if (type == OBSTACLE_TYPE_WALL)
 			g_array_remove_index(obstacles, i);
 	}
 }
@@ -191,14 +191,14 @@ static void swarm_add_walls(Swarm *swarm)
 
 	y = OBSTACLE_RADIUS;
 	for (x = 0; x < swarm->width + OBSTACLE_RADIUS; x += (OBSTACLE_RADIUS >> 1)) {
-		swarm_add_obstacle(swarm, x, -y, OBSTACLE_FLAG_WALL);
-		swarm_add_obstacle(swarm, x, swarm->height + y, OBSTACLE_FLAG_WALL);
+		swarm_add_obstacle(swarm, x, -y, OBSTACLE_TYPE_WALL);
+		swarm_add_obstacle(swarm, x, swarm->height + y, OBSTACLE_TYPE_WALL);
 	}
 
 	x = y;
 	for (y = 0; y < swarm->height + OBSTACLE_RADIUS; y += (OBSTACLE_RADIUS >> 1)) {
-		swarm_add_obstacle(swarm, -x, y, OBSTACLE_FLAG_WALL);
-		swarm_add_obstacle(swarm, swarm->width + x, y, OBSTACLE_FLAG_WALL);
+		swarm_add_obstacle(swarm, -x, y, OBSTACLE_TYPE_WALL);
+		swarm_add_obstacle(swarm, swarm->width + x, y, OBSTACLE_TYPE_WALL);
 	}
 }
 

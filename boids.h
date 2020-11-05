@@ -44,12 +44,15 @@ typedef struct {
 	Vector obstacle;
 } Boid;
 
-typedef struct {
-	Vector pos;
-	guint flags;
-} Obstacle;
+typedef enum {
+	OBSTACLE_TYPE_IN_FIELD = 0,
+	OBSTACLE_TYPE_WALL,
+} ObstacleType;
 
-#define OBSTACLE_FLAG_WALL 0x01
+typedef struct {
+	ObstacleType type;
+	Vector pos;
+} Obstacle;
 
 typedef struct _Swarm Swarm;
 
@@ -136,7 +139,7 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
 #define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
-#define swarm_obstacle_get_flags(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).flags)
+#define swarm_obstacle_get_type(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).type)
 #define swarm_num_obstacles(swarm) ((swarm)->obstacles->len)
 
 void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
