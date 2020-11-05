@@ -101,6 +101,42 @@ static void draw_obstacles(BoidsGui *gui)
 	}
 }
 
+static void draw_boid(BoidsGui *gui, Boid *b)
+{
+	Vector direction;
+	Vector orth;
+	Vector top;
+	Vector bottom1;
+	Vector bottom2;
+
+	top =
+	bottom1 =
+	bottom2 = b->pos;
+	direction = b->velocity;
+
+	vector_set_mag(&direction, 5);
+	vector_add(&top, &direction);
+	vector_sub(&bottom1, &direction);
+	vector_sub(&bottom2, &direction);
+
+	/* Using 'orth.x = -direction.y;' gives a nice 3D effect */
+	orth.x = direction.y;
+	orth.y = -direction.x;
+	vector_set_mag(&orth, 3);
+
+	vector_sub(&bottom1, &orth);
+	vector_add(&bottom2, &orth);
+
+	cairo_set_line_width(gui->cr, 3);
+	cairo_set_source_rgba(gui->cr, b->red, 0.0, 1.0 - b->red, 1.0);
+
+	cairo_move_to(gui->cr, bottom1.x, bottom1.y);
+	cairo_line_to(gui->cr, top.x, top.y);
+	cairo_line_to(gui->cr, bottom2.x, bottom2.y);
+	cairo_set_line_join(gui->cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_stroke(gui->cr);
+}
+
 static void draw(BoidsGui *gui)
 {
 	int i;
@@ -112,33 +148,7 @@ static void draw(BoidsGui *gui)
 
 	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
 		Boid *b = swarm_get_boid(gui->swarm, i);
-		Vector velocity = b->velocity;
-		Vector orth;
-		Vector top = b->pos;
-		Vector bottom1 = b->pos;
-		Vector bottom2 = b->pos;
-
-		vector_set_mag(&velocity, 5);
-		vector_add(&top, &velocity);
-		vector_sub(&bottom1, &velocity);
-		vector_sub(&bottom2, &velocity);
-
-		/* Using 'orth.x = -velocity.y;' gives a nice 3D effect */
-		orth.x = velocity.y;
-		orth.y = -velocity.x;
-		vector_set_mag(&orth, 3);
-
-		vector_sub(&bottom1, &orth);
-		vector_add(&bottom2, &orth);
-
-		cairo_set_line_width(gui->cr, 3);
-		cairo_set_source_rgba(gui->cr, b->red, 0.0, 1.0 - b->red, 1.0);
-
-		cairo_move_to(gui->cr, bottom1.x, bottom1.y);
-		cairo_line_to(gui->cr, top.x, top.y);
-		cairo_line_to(gui->cr, bottom2.x, bottom2.y);
-		cairo_set_line_join(gui->cr, CAIRO_LINE_JOIN_ROUND);
-		cairo_stroke(gui->cr);
+		draw_boid(gui, b);
 	}
 }
 
