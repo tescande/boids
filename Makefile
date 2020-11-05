@@ -7,10 +7,6 @@ SRCS = boids.c swarm.c gui.c
 OBJS = $(SRCS:%.c=%.o)
 TARGET = boids
 
-ifeq ($(BOIDS_DEBUG),1)
-CFLAGS += -DBOIDS_DEBUG
-endif
-
 default: all
 
 all: $(TARGET)

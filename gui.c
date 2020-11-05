@@ -511,9 +511,9 @@ int gtk_boids_run(Swarm *swarm)
 
 	gtk_main();
 
-#ifdef BOIDS_DEBUG
-	g_object_unref(gui->timing_label);
-#endif
+	if (gui->timing_label)
+		g_object_unref(gui->timing_label);
+
 	g_object_unref(gui->drawing_area);
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
