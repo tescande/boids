@@ -80,7 +80,6 @@ typedef struct _Swarm {
 	gpointer animate_cb_userdata;
 
 	gboolean debug_controls;
-	gboolean debug_timing;
 	gboolean debug_vectors;
 } Swarm;
 
