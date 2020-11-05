@@ -242,6 +242,21 @@ void swarm_set_dead_angle(Swarm *swarm, guint angle)
 	swarm->cos_dead_angle = cos(G_PI - deg2rad((gdouble)angle / 2));
 }
 
+void swarm_init_boid(Swarm *swarm, Boid *boid)
+{
+	memset(boid, 0, sizeof(Boid));
+
+	boid->pos.x = g_random_int_range(0, swarm->width);
+	boid->pos.y = g_random_int_range(0, swarm->height);
+
+	boid->velocity.x = g_random_int_range(-5, 6);
+	do {
+		boid->velocity.y = g_random_int_range(-5, 6);
+	} while (vector_is_null(&boid->velocity));
+
+	vector_set_mag(&boid->velocity, 5);
+}
+
 void swarm_set_num_boids(Swarm *swarm, guint num)
 {
 	GArray *boids = swarm->boids;
@@ -252,16 +267,7 @@ void swarm_set_num_boids(Swarm *swarm, guint num)
 
 	if (num > boids->len) {
 		while (boids->len < num) {
-			b.pos.x = g_random_int_range(0, swarm->width);
-			b.pos.y = g_random_int_range(0, swarm->height);
-
-			b.velocity.x = g_random_int_range(-5, 6);
-			do {
-				b.velocity.y = g_random_int_range(-5, 6);
-			} while (vector_is_null(&b.velocity));
-
-			vector_set_mag(&b.velocity, 5);
-
+			swarm_init_boid(swarm, &b);
 			g_array_append_val(swarm->boids, b);
 		}
 	} else if (num < boids->len) {
