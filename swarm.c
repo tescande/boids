@@ -122,13 +122,13 @@ void swarm_move(Swarm *swarm)
 			vector_add(&b1->velocity, &attract);
 		}
 
-		vector_set_mag(&b1->velocity, 4.0);
+		vector_set_mag(&b1->velocity, 5.0);
 
 		swarm_avoid_obstacles(swarm, b1, &avoid_obstacle);
 
 		if (!vector_is_null(&avoid_obstacle)) {
 			vector_add(&b1->velocity, &avoid_obstacle);
-			vector_set_mag(&b1->velocity, 4.0);
+			vector_set_mag(&b1->velocity, 5.0);
 		}
 
 		vector_add(&b1->pos, &b1->velocity);
