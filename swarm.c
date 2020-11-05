@@ -160,7 +160,7 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 {
-	Vector *o;
+	Obstacle *o;
 	gdouble dist;
 	int i;
 
@@ -169,8 +169,12 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 
 	i = swarm->obstacles->len;
 	while (i--) {
-		o = swarm_obstacle_get_pos(swarm, i);
-		dist = POW2(o->x - x) + POW2(o->y - y);
+		o = swarm_obstacle_get(swarm, i);
+		/* Remove only field obstacle */
+		if (o->type != OBSTACLE_TYPE_IN_FIELD)
+			continue;
+
+		dist = POW2(o->pos.x - x) + POW2(o->pos.y - y);
 		if (dist <= POW2(OBSTACLE_RADIUS)) {
 			g_array_remove_index(swarm->obstacles, i);
 			return TRUE;
