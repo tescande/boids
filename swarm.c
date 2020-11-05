@@ -7,7 +7,7 @@ void swarm_move(Swarm *swarm)
 	int j;
 	Boid *b1;
 	Boid *b2;
-	double dist;
+	gdouble dist;
 	guint min_dist;
 	gdouble dx, dy;
 	gdouble cos_angle;
