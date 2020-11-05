@@ -282,15 +282,37 @@ static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
 	swarm_set_dead_angle(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 }
 
-static gboolean on_mouse_clicked(GtkWidget *da, GdkEventButton *event,
-				 BoidsGui *gui)
+static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 {
 	gboolean redraw = TRUE;
+	gboolean button1 = FALSE;
+	gboolean control = FALSE;
+	gdouble x, y;
 
-	if (!(event->state & GDK_CONTROL_MASK))
-		swarm_add_obstacle(gui->swarm, event->x, event->y, OBSTACLE_TYPE_IN_FIELD);
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+		x = event->button.x;
+		y = event->button.y;
+		button1 = (event->button.button == 1);
+		control = ((event->button.state & GDK_CONTROL_MASK) != 0);
+		break;
+	case GDK_MOTION_NOTIFY:
+		x = event->motion.x;
+		y = event->motion.y;
+		button1 = ((event->motion.state & GDK_BUTTON1_MASK) != 0);
+		control = ((event->motion.state & GDK_CONTROL_MASK) != 0);
+		break;
+	default:
+		return FALSE;
+	}
+
+	if (!button1)
+		return FALSE;
+
+	if (control)
+		redraw = swarm_remove_obstacle(gui->swarm, x, y);
 	else
-		redraw = swarm_remove_obstacle(gui->swarm, event->x, event->y);
+		swarm_add_obstacle(gui->swarm, x, y, OBSTACLE_TYPE_IN_FIELD);
 
 	if (!swarm_thread_running(gui->swarm) && redraw) {
 		draw(gui);
@@ -426,9 +448,9 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(drawing_area), "configure-event",
 			 G_CALLBACK(on_configure_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "button-press-event",
-			 G_CALLBACK(on_mouse_clicked), gui);
+			 G_CALLBACK(on_mouse_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "motion-notify-event",
-			 G_CALLBACK(on_mouse_clicked), gui);
+			 G_CALLBACK(on_mouse_event), gui);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
