@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
-static void swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *direction)
+static gboolean swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *direction)
 {
 	int i;
 	gdouble dx, dy;
@@ -27,6 +27,13 @@ static void swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *direction)
 		vector_div(&v, dist / 4);
 		vector_add(direction, &v);
 	}
+
+	if (vector_is_null(direction))
+		return FALSE;
+
+	vector_set_mag(direction, 5);
+
+	return TRUE;
 }
 
 void swarm_move(Swarm *swarm)
@@ -124,9 +131,7 @@ void swarm_move(Swarm *swarm)
 
 		vector_set_mag(&b1->velocity, 5.0);
 
-		swarm_avoid_obstacles(swarm, b1, &avoid_obstacle);
-
-		if (!vector_is_null(&avoid_obstacle)) {
+		if (swarm_avoid_obstacles(swarm, b1, &avoid_obstacle)) {
 			vector_add(&b1->velocity, &avoid_obstacle);
 			vector_set_mag(&b1->velocity, 5.0);
 		}
