@@ -513,7 +513,7 @@ static void gui_show(BoidsGui *gui)
 	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
 
-	label = gtk_label_new("Boids:");
+	label = gtk_label_new("Boids Number:");
 	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
@@ -533,8 +533,13 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_walls_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
-	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
-	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_spacing(GTK_BOX(hbox), 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Boids Rules:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 	check = gtk_check_button_new_with_label("Avoid");
 	active = swarm_rule_get_active(gui->swarm, RULE_AVOID);
@@ -570,8 +575,9 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_dead_angle_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 
-	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
-	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+	gtk_box_set_spacing(GTK_BOX(hbox), 5);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
 	label = gtk_label_new("Mouse Mode:");
 	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
