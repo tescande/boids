@@ -17,6 +17,7 @@ typedef struct {
 
 	GtkWidget *timing_label;
 	gulong compute_time;
+	gint64 update_label_time;
 } BoidsGui;
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
@@ -159,6 +160,8 @@ static void animate_cb(BoidsGui *gui, gulong time)
 {
 	GTimer *timer = g_timer_new();
 	gulong elapsed;
+	gulong compute_time;
+	gint64 curr_time;
 
 	g_timer_start(timer);
 
@@ -167,11 +170,20 @@ static void animate_cb(BoidsGui *gui, gulong time)
 	g_mutex_unlock(&gui->lock);
 
 	g_timer_elapsed(timer, &elapsed);
+	compute_time = time + elapsed;
 
-	gui->compute_time = time + elapsed;
+	if (swarm_show_debug_controls(gui->swarm)) {
+		curr_time = g_get_monotonic_time();
 
-	if (time + elapsed < DELAY)
-		g_usleep(DELAY - time - elapsed);
+		if (curr_time - gui->update_label_time > G_USEC_PER_SEC ||
+		    compute_time > gui->compute_time) {
+			gui->update_label_time = curr_time;
+			gui->compute_time = compute_time;
+		}
+	}
+
+	if (compute_time < DELAY)
+		g_usleep(DELAY - compute_time);
 }
 
 static gboolean queue_draw(BoidsGui *gui)
