@@ -184,19 +184,22 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 	return FALSE;
 }
 
-static void swarm_remove_walls(Swarm *swarm)
+static void swarm_remove_obstacle_type(Swarm *swarm, guint type)
 {
-	GArray *obstacles = swarm->obstacles;
-	guint type;
+	Obstacle *o;
 	gint i;
 
-	i = obstacles->len;
+	i = swarm->obstacles->len;
 	while (i--) {
-		type = swarm_obstacle_get_type(swarm, i);
-
-		if (type == OBSTACLE_TYPE_WALL)
-			g_array_remove_index(obstacles, i);
+		o = swarm_obstacle_get(swarm, i);
+		if (o->type == type)
+			g_array_remove_index(swarm->obstacles, i);
 	}
+}
+
+static void swarm_remove_walls(Swarm *swarm)
+{
+	swarm_remove_obstacle_type(swarm, OBSTACLE_TYPE_WALL);
 }
 
 static void swarm_add_walls(Swarm *swarm)
