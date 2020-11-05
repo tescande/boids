@@ -52,6 +52,11 @@ typedef enum {
 typedef struct {
 	ObstacleType type;
 	Vector pos;
+	/*
+	 * avoid_radius is actually the power of 2 of the avoid radius value
+	 * to save a sqrt() call for distance comparison
+	 */
+	gdouble avoid_radius;
 } Obstacle;
 
 typedef struct _Swarm Swarm;

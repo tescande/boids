@@ -17,7 +17,7 @@ static void swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *direction)
 		dx = obs->pos.x - boid->pos.x;
 		dy = obs->pos.y - boid->pos.y;
 		dist = POW2(dx) + POW2(dy);
-		if (dist >= POW2(OBSTACLE_RADIUS * 1.5))
+		if (dist >= obs->avoid_radius)
 			continue;
 
 		dist = sqrt(dist);
@@ -143,6 +143,7 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 		.pos.x = x,
 		.pos.y = y,
 		.type = type,
+		.avoid_radius = POW2(OBSTACLE_RADIUS * 1.5),
 	};
 
 	i = swarm->obstacles->len;
