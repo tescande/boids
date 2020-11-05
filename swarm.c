@@ -111,6 +111,17 @@ void swarm_move(Swarm *swarm)
 		vector_add(&b1->velocity, &align);
 		vector_add(&b1->velocity, &cohesion);
 
+		if (swarm->attractive_mouse && swarm->mouse_pos.x >= 0) {
+			Vector attract;
+
+			dx = swarm->mouse_pos.x - b1->pos.x;
+			dy = swarm->mouse_pos.y - b1->pos.y;
+
+			vector_set(&attract, dx, dy);
+			vector_normalize(&attract);
+			vector_add(&b1->velocity, &attract);
+		}
+
 		vector_set_mag(&b1->velocity, 4.0);
 
 		swarm_avoid_obstacles(swarm, b1, &avoid_obstacle);
@@ -273,10 +284,14 @@ void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y)
 void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode)
 {
 	gboolean scary = FALSE;
+	gboolean attractive = FALSE;
 
 	switch (mode) {
 	case MOUSE_MODE_SCARY:
 		scary = TRUE;
+		break;
+	case MOUSE_MODE_ATTRACTIVE:
+		attractive = TRUE;
 		break;
 	default:
 		break;
@@ -290,6 +305,7 @@ void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode)
 		swarm_remove_obstacle_type(swarm, OBSTACLE_TYPE_SCARY_MOUSE);
 
 	swarm->scary_mouse = scary;
+	swarm->attractive_mouse = attractive;
 }
 
 guint swarm_get_dead_angle(Swarm *swarm)

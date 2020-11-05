@@ -90,6 +90,7 @@ typedef struct _Swarm {
 
 	Vector mouse_pos;
 	gboolean scary_mouse;
+	gboolean attractive_mouse;
 
 	gboolean debug_controls;
 	gboolean debug_vectors;
@@ -105,6 +106,7 @@ typedef enum {
 typedef enum {
 	MOUSE_MODE_NONE = 0,
 	MOUSE_MODE_SCARY,
+	MOUSE_MODE_ATTRACTIVE,
 } MouseMode;
 
 static inline gdouble deg2rad(gdouble deg)

@@ -301,6 +301,12 @@ static void on_mouse_mode_scary_clicked(GtkToggleButton *button, BoidsGui *gui)
 		on_mouse_mode_clicked(button, gui, MOUSE_MODE_SCARY);
 }
 
+static void on_mouse_mode_attractive_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	if (gtk_toggle_button_get_active(button))
+		on_mouse_mode_clicked(button, gui, MOUSE_MODE_ATTRACTIVE);
+}
+
 static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 {
 	gboolean redraw = TRUE;
@@ -579,6 +585,11 @@ static void gui_show(BoidsGui *gui)
 	radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio), "Scary");
 	g_signal_connect(G_OBJECT(radio), "toggled",
 			 G_CALLBACK(on_mouse_mode_scary_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), radio, FALSE, FALSE, 0);
+
+	radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio), "Attractive");
+	g_signal_connect(G_OBJECT(radio), "toggled",
+			 G_CALLBACK(on_mouse_mode_attractive_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), radio, FALSE, FALSE, 0);
 
 	if (swarm_show_debug_controls(gui->swarm))
