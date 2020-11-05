@@ -229,6 +229,11 @@ void swarm_walls_set_enable(Swarm *swarm, gboolean enable)
 		swarm_remove_walls(swarm);
 }
 
+void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y)
+{
+	vector_set(&swarm->mouse_pos, x, y);
+}
+
 guint swarm_get_dead_angle(Swarm *swarm)
 {
 	return ceil(rad2deg((G_PI - acos(swarm->cos_dead_angle)) * 2));

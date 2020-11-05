@@ -302,9 +302,19 @@ static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 		button1 = ((event->motion.state & GDK_BUTTON1_MASK) != 0);
 		control = ((event->motion.state & GDK_CONTROL_MASK) != 0);
 		break;
+	case GDK_ENTER_NOTIFY:
+		x = event->motion.x;
+		y = event->motion.y;
+		break;
+	case GDK_LEAVE_NOTIFY:
+		x = -1000;
+		y = -1000;
+		break;
 	default:
 		return FALSE;
 	}
+
+	swarm_set_mouse_pos(gui->swarm, x, y);
 
 	if (!button1)
 		return FALSE;
@@ -444,12 +454,18 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_draw), gui);
 	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK |
 					    GDK_BUTTON_PRESS_MASK |
-					    GDK_BUTTON1_MOTION_MASK);
+					    GDK_POINTER_MOTION_MASK |
+					    GDK_ENTER_NOTIFY_MASK |
+					    GDK_LEAVE_NOTIFY_MASK);
 	g_signal_connect(G_OBJECT(drawing_area), "configure-event",
 			 G_CALLBACK(on_configure_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "button-press-event",
 			 G_CALLBACK(on_mouse_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "motion-notify-event",
+			 G_CALLBACK(on_mouse_event), gui);
+	g_signal_connect(G_OBJECT(drawing_area), "enter-notify-event",
+			 G_CALLBACK(on_mouse_event), gui);
+	g_signal_connect(G_OBJECT(drawing_area), "leave-notify-event",
 			 G_CALLBACK(on_mouse_event), gui);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);

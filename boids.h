@@ -82,6 +82,8 @@ typedef struct _Swarm {
 	SwarmAnimateFunc animate_cb;
 	gpointer animate_cb_userdata;
 
+	Vector mouse_pos;
+
 	gboolean debug_controls;
 	gboolean debug_vectors;
 } Swarm;
@@ -133,6 +135,8 @@ void swarm_set_num_boids(Swarm *swarm, guint num);
 
 guint swarm_get_dead_angle(Swarm *swarm);
 void swarm_set_dead_angle(Swarm *swarm, guint angle);
+
+void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y);
 
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
