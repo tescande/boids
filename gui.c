@@ -93,7 +93,8 @@ static void draw_obstacles(BoidsGui *gui)
 	for (i = 0; i < swarm_num_obstacles(gui->swarm); i++) {
 		Obstacle *o = swarm_obstacle_get(gui->swarm, i);
 
-		if (o->type == OBSTACLE_TYPE_WALL)
+		if (o->type == OBSTACLE_TYPE_WALL ||
+		    o->type == OBSTACLE_TYPE_SCARY_MOUSE)
 			continue;
 
 		cairo_arc(gui->cr, o->pos.x, o->pos.y, OBSTACLE_RADIUS, 0, 2 * G_PI);
@@ -282,6 +283,24 @@ static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
 	swarm_set_dead_angle(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 }
 
+static void on_mouse_mode_clicked(GtkToggleButton *button, BoidsGui *gui,
+				  MouseMode mode)
+{
+	swarm_set_mouse_mode(gui->swarm, mode);
+}
+
+static void on_mouse_mode_none_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	if (gtk_toggle_button_get_active(button))
+		on_mouse_mode_clicked(button, gui, MOUSE_MODE_NONE);
+}
+
+static void on_mouse_mode_scary_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	if (gtk_toggle_button_get_active(button))
+		on_mouse_mode_clicked(button, gui, MOUSE_MODE_SCARY);
+}
+
 static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 {
 	gboolean redraw = TRUE;
@@ -431,6 +450,7 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *label;
 	GtkWidget *separator;
 	GtkWidget *check;
+	GtkWidget *radio;
 	gboolean active;
 	gint width;
 	gint height;
@@ -543,6 +563,23 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_dead_angle_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	label = gtk_label_new("Mouse Mode:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	radio = gtk_radio_button_new_with_label(NULL, "None");
+	g_signal_connect(G_OBJECT(radio), "toggled",
+			 G_CALLBACK(on_mouse_mode_none_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), radio, FALSE, FALSE, 0);
+
+	radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(radio), "Scary");
+	g_signal_connect(G_OBJECT(radio), "toggled",
+			 G_CALLBACK(on_mouse_mode_scary_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), radio, FALSE, FALSE, 0);
 
 	if (swarm_show_debug_controls(gui->swarm))
 		gui_show_debug_controls(gui, vbox);

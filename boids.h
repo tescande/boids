@@ -47,6 +47,7 @@ typedef struct {
 typedef enum {
 	OBSTACLE_TYPE_IN_FIELD = 0,
 	OBSTACLE_TYPE_WALL,
+	OBSTACLE_TYPE_SCARY_MOUSE,
 } ObstacleType;
 
 typedef struct {
@@ -88,6 +89,7 @@ typedef struct _Swarm {
 	gpointer animate_cb_userdata;
 
 	Vector mouse_pos;
+	gboolean scary_mouse;
 
 	gboolean debug_controls;
 	gboolean debug_vectors;
@@ -99,6 +101,11 @@ typedef enum {
 	RULE_COHESION,
 	RULE_DEAD_ANGLE,
 } SwarmRule;
+
+typedef enum {
+	MOUSE_MODE_NONE = 0,
+	MOUSE_MODE_SCARY,
+} MouseMode;
 
 static inline gdouble deg2rad(gdouble deg)
 {
@@ -142,6 +149,8 @@ guint swarm_get_dead_angle(Swarm *swarm);
 void swarm_set_dead_angle(Swarm *swarm, guint angle);
 
 void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y);
+
+void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode);
 
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);

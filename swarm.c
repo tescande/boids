@@ -147,8 +147,27 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 	};
 
 	i = swarm->obstacles->len;
+
+	/* Only one scary mouse obstacle as first element in the array. */
+	if (type == OBSTACLE_TYPE_SCARY_MOUSE) {
+		o = i ? swarm_obstacle_get(swarm, 0) : NULL;
+
+		if (!o || o->type != OBSTACLE_TYPE_SCARY_MOUSE) {
+			/* The scary mouse obstacle is much bigger */
+			new.avoid_radius = POW2(OBSTACLE_RADIUS * 10);
+			g_array_prepend_val(swarm->obstacles, new);
+		}
+
+		return;
+	}
+
 	while (i--) {
 		o = swarm_obstacle_get(swarm, i);
+
+		/* Ignore the scary mouse obstacle */
+		if (o->type == OBSTACLE_TYPE_SCARY_MOUSE)
+			continue;
+
 		dx = o->pos.x - x;
 		dy = o->pos.y - y;
 		if (abs(dx) < (OBSTACLE_RADIUS >> 1) &&
@@ -239,7 +258,38 @@ void swarm_walls_set_enable(Swarm *swarm, gboolean enable)
 
 void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y)
 {
+	Obstacle *o;
+
 	vector_set(&swarm->mouse_pos, x, y);
+
+	/* Update the scary mouse obstacle position */
+	if (swarm->scary_mouse && swarm_num_obstacles(swarm)) {
+		o = swarm_obstacle_get(swarm, 0);
+		if (o->type == OBSTACLE_TYPE_SCARY_MOUSE)
+			vector_set(&o->pos, x, y);
+	}
+}
+
+void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode)
+{
+	gboolean scary = FALSE;
+
+	switch (mode) {
+	case MOUSE_MODE_SCARY:
+		scary = TRUE;
+		break;
+	default:
+		break;
+	}
+
+	if (scary)
+		swarm_add_obstacle(swarm,
+				   swarm->mouse_pos.x, swarm->mouse_pos.y,
+				   OBSTACLE_TYPE_SCARY_MOUSE);
+	else
+		swarm_remove_obstacle_type(swarm, OBSTACLE_TYPE_SCARY_MOUSE);
+
+	swarm->scary_mouse = scary;
 }
 
 guint swarm_get_dead_angle(Swarm *swarm)
