@@ -1,6 +1,34 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
+static void swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *direction)
+{
+	int i;
+	gdouble dx, dy;
+	gdouble dist;
+	Obstacle *obs;
+	Vector v;
+
+	vector_init(direction);
+
+	for (i = 0; i < swarm->obstacles->len; i++) {
+		obs = swarm_obstacle_get(swarm, i);
+
+		dx = obs->pos.x - boid->pos.x;
+		dy = obs->pos.y - boid->pos.y;
+		dist = POW2(dx) + POW2(dy);
+		if (dist >= POW2(OBSTACLE_RADIUS * 1.5))
+			continue;
+
+		dist = sqrt(dist);
+
+		v = boid->pos;
+		vector_sub(&v, &obs->pos);
+		vector_div(&v, dist / 4);
+		vector_add(direction, &v);
+	}
+}
+
 void swarm_move(Swarm *swarm)
 {
 	int i;
@@ -22,7 +50,6 @@ void swarm_move(Swarm *swarm)
 		b1 = swarm_get_boid(swarm, i);
 
 		vector_init(&avoid);
-		vector_init(&avoid_obstacle);
 		vector_init(&align);
 		vector_init(&cohesion);
 		cohesion_n = 0;
@@ -86,22 +113,7 @@ void swarm_move(Swarm *swarm)
 
 		vector_set_mag(&b1->velocity, 4.0);
 
-		for (j = 0; j < swarm->obstacles->len; j++) {
-			Vector *obs = swarm_obstacle_get_pos(swarm, j);
-
-			dx = obs->x - b1->pos.x;
-			dy = obs->y - b1->pos.y;
-			dist = POW2(dx) + POW2(dy);
-			if (dist >= POW2(OBSTACLE_RADIUS * 1.5))
-				continue;
-
-			dist = sqrt(dist);
-
-			v = b1->pos;
-			vector_sub(&v, obs);
-			vector_div(&v, dist / 4);
-			vector_add(&avoid_obstacle, &v);
-		}
+		swarm_avoid_obstacles(swarm, b1, &avoid_obstacle);
 
 		if (!vector_is_null(&avoid_obstacle)) {
 			vector_add(&b1->velocity, &avoid_obstacle);
