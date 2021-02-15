@@ -105,37 +105,21 @@ static void draw_obstacles(BoidsGui *gui)
 
 static void draw_boid(BoidsGui *gui, Boid *b)
 {
-	Vector direction;
-	Vector orth;
 	Vector top;
-	Vector bottom1;
-	Vector bottom2;
+	Vector bottom;
+	Vector length;
 
-	top =
-	bottom1 =
-	bottom2 = b->pos;
-	direction = b->velocity;
+	top = bottom = b->pos;
+	length = b->velocity;
+	vector_set_mag(&length, 2);
+	vector_add(&top, &length);
+	vector_sub(&bottom, &length);
 
-	vector_set_mag(&direction, 5);
-	vector_add(&top, &direction);
-	vector_sub(&bottom1, &direction);
-	vector_sub(&bottom2, &direction);
-
-	/* Using 'orth.x = -direction.y;' gives a nice 3D effect */
-	orth.x = direction.y;
-	orth.y = -direction.x;
-	vector_set_mag(&orth, 3);
-
-	vector_sub(&bottom1, &orth);
-	vector_add(&bottom2, &orth);
-
-	cairo_set_line_width(gui->cr, 3);
-	cairo_set_source_rgba(gui->cr, b->red, 0.0, 1.0 - b->red, 1.0);
-
-	cairo_move_to(gui->cr, bottom1.x, bottom1.y);
-	cairo_line_to(gui->cr, top.x, top.y);
-	cairo_line_to(gui->cr, bottom2.x, bottom2.y);
-	cairo_set_line_join(gui->cr, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_width(gui->cr, 4);
+	cairo_set_line_cap(gui->cr, CAIRO_LINE_CAP_ROUND);
+	cairo_move_to(gui->cr, top.x, top.y);
+	cairo_line_to(gui->cr, bottom.x, bottom.y);
+	cairo_set_source_rgb(gui->cr, b->red, 0.0, 1.0 - b->red);
 	cairo_stroke(gui->cr);
 }
 
