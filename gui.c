@@ -6,9 +6,12 @@
 
 #define DEBUG_VECT_FACTOR 20
 
+#define BG_GRAY 0.8
+
 typedef struct {
 	GtkWidget *drawing_area;
 	cairo_surface_t *surface;
+	cairo_surface_t *bg_surface;
 	cairo_t *cr;
 
 	GMutex lock;
@@ -127,7 +130,11 @@ static void draw(BoidsGui *gui)
 {
 	int i;
 
-	cairo_set_source_rgba(gui->cr, 0.8, 0.8, 0.8, 1.0);
+	if (!swarm_thread_running(gui->swarm))
+		cairo_set_source_rgba(gui->cr, BG_GRAY, BG_GRAY, BG_GRAY, 1.0);
+	else
+		cairo_set_source_surface(gui->cr, gui->bg_surface, 0, 0);
+
 	cairo_paint(gui->cr);
 
 	draw_obstacles(gui);
@@ -187,6 +194,7 @@ static void cairo_init(BoidsGui *gui)
 {
 	gint width;
 	gint height;
+	cairo_t *bg_cr;
 
 	swarm_get_sizes(gui->swarm, &width, &height);
 
@@ -199,6 +207,14 @@ static void cairo_init(BoidsGui *gui)
 						  width, height);
 	gui->cr = cairo_create(gui->surface);
 
+	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+						     width, height);
+	bg_cr = cairo_create(gui->bg_surface);
+
+	cairo_set_source_rgba(bg_cr, BG_GRAY, BG_GRAY, BG_GRAY, .5);
+	cairo_paint(bg_cr);
+	cairo_destroy(bg_cr);
+
 	draw(gui);
 
 	g_mutex_unlock(&gui->lock);
@@ -209,6 +225,7 @@ static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 	if (swarm_thread_running(gui->swarm)) {
 		swarm_thread_stop(gui->swarm);
 		gtk_button_set_label(button, "Start");
+		draw(gui);
 		return;
 	}
 
