@@ -296,6 +296,11 @@ static void on_dead_angle_changed(GtkSpinButton *spin, BoidsGui *gui)
 	swarm_set_dead_angle(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 }
 
+static void on_speed_changed(GtkSpinButton *spin, BoidsGui *gui)
+{
+	swarm_set_speed(gui->swarm, gtk_spin_button_get_value(spin));
+}
+
 static void on_mouse_mode_clicked(GtkToggleButton *button, BoidsGui *gui,
 				  MouseMode mode)
 {
@@ -586,6 +591,16 @@ static void gui_show(BoidsGui *gui)
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_dead_angle(gui->swarm));
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_dead_angle_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+
+	label = gtk_label_new("Speed:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	spin = gtk_spin_button_new_with_range(MIN_SPEED, MAX_SPEED, 0.2);
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_speed(gui->swarm));
+	g_signal_connect(G_OBJECT(spin), "value-changed",
+			 G_CALLBACK(on_speed_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
