@@ -129,11 +129,11 @@ void swarm_move(Swarm *swarm)
 			vector_add(&b1->velocity, &attract);
 		}
 
-		vector_set_mag(&b1->velocity, 5.0);
+		vector_set_mag(&b1->velocity, swarm->speed);
 
 		if (swarm_avoid_obstacles(swarm, b1, &avoid_obstacle)) {
 			vector_add(&b1->velocity, &avoid_obstacle);
-			vector_set_mag(&b1->velocity, 5.0);
+			vector_set_mag(&b1->velocity, swarm->speed);
 		}
 
 		vector_add(&b1->pos, &b1->velocity);
@@ -324,6 +324,21 @@ void swarm_set_dead_angle(Swarm *swarm, guint angle)
 		angle = 360;
 
 	swarm->cos_dead_angle = cos(G_PI - deg2rad((gdouble)angle / 2));
+}
+
+gdouble swarm_get_speed(Swarm *swarm)
+{
+	return swarm->speed;
+}
+
+void swarm_set_speed(Swarm *swarm, gdouble speed)
+{
+	if (speed < MIN_SPEED)
+		speed = MIN_SPEED;
+	else if (speed > MAX_SPEED)
+		speed = MAX_SPEED;
+
+	swarm->speed = speed;
 }
 
 void swarm_init_boid(Swarm *swarm, Boid *boid)
@@ -536,6 +551,7 @@ Swarm *swarm_alloc(void)
 
 	swarm_set_num_boids(swarm, DEFAULT_NUM_BOIDS);
 	swarm_set_dead_angle(swarm, DEFAULT_DEAD_ANGLE);
+	swarm_set_speed(swarm, DEFAULT_SPEED);
 
 	swarm->avoid_dist = AVOID_DIST_DFLT;
 	swarm->align_dist = ALIGN_DIST_DFLT;

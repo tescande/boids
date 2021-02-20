@@ -16,6 +16,10 @@
 
 #define DEFAULT_DEAD_ANGLE (60)
 
+#define DEFAULT_SPEED 4.5
+#define MIN_SPEED 1.0
+#define MAX_SPEED 8.0
+
 #define OBSTACLE_RADIUS 20
 
 #define AVOID_DIST_DFLT 30
@@ -78,6 +82,7 @@ typedef struct _Swarm {
 	gboolean cohesion;
 	gboolean dead_angle;
 	gdouble cos_dead_angle;
+	gdouble speed;
 
 	guint avoid_dist;
 	guint align_dist;
@@ -149,6 +154,9 @@ void swarm_set_num_boids(Swarm *swarm, guint num);
 
 guint swarm_get_dead_angle(Swarm *swarm);
 void swarm_set_dead_angle(Swarm *swarm, guint angle);
+
+gdouble swarm_get_speed(Swarm *swarm);
+void swarm_set_speed(Swarm *swarm, gdouble speed);
 
 void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y);
 
