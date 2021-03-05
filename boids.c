@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		{ "rand-seed", 's', 0, G_OPTION_ARG_INT, &seed,
 		  "Random seed value", "VAL" },
 		{ "debug-controls", 'd', 0, G_OPTION_ARG_NONE, &debug,
-		  "Random seed value", "VAL" },
+		  "Enable debug controls", NULL },
 		{ NULL }
 	};
 
