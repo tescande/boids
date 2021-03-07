@@ -36,6 +36,9 @@ int main(int argc, char **argv)
 	swarm_set_debug_controls(swarm, debug);
 	swarm_set_num_boids(swarm, num_boids);
 	swarm_walls_set_enable(swarm, walls);
+	swarm_rule_set_active(swarm, RULE_AVOID, TRUE);
+	swarm_rule_set_active(swarm, RULE_ALIGN, TRUE);
+	swarm_rule_set_active(swarm, RULE_COHESION, TRUE);
 
 	gtk_boids_run(swarm);
 
