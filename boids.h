@@ -39,7 +39,6 @@
 typedef struct {
 	Vector pos;
 	Vector velocity;
-	gdouble red;
 
 	/* For debugging purpose */
 	Vector avoid;

@@ -122,7 +122,7 @@ static void draw_boid(cairo_t *cr, Boid *b)
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 	cairo_move_to(cr, top.x, top.y);
 	cairo_line_to(cr, bottom.x, bottom.y);
-	cairo_set_source_rgb(cr, b->red, 0.0, 1.0 - b->red);
+	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 	cairo_stroke(cr);
 }
 
