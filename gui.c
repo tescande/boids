@@ -106,7 +106,7 @@ static void draw_obstacles(BoidsGui *gui)
 	}
 }
 
-static void draw_boid(BoidsGui *gui, Boid *b)
+static void draw_boid(cairo_t *cr, Boid *b)
 {
 	Vector top;
 	Vector bottom;
@@ -118,12 +118,12 @@ static void draw_boid(BoidsGui *gui, Boid *b)
 	vector_add(&top, &length);
 	vector_sub(&bottom, &length);
 
-	cairo_set_line_width(gui->cr, 4);
-	cairo_set_line_cap(gui->cr, CAIRO_LINE_CAP_ROUND);
-	cairo_move_to(gui->cr, top.x, top.y);
-	cairo_line_to(gui->cr, bottom.x, bottom.y);
-	cairo_set_source_rgb(gui->cr, b->red, 0.0, 1.0 - b->red);
-	cairo_stroke(gui->cr);
+	cairo_set_line_width(cr, 4);
+	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+	cairo_move_to(cr, top.x, top.y);
+	cairo_line_to(cr, bottom.x, bottom.y);
+	cairo_set_source_rgb(cr, b->red, 0.0, 1.0 - b->red);
+	cairo_stroke(cr);
 }
 
 static void draw(BoidsGui *gui)
@@ -141,7 +141,7 @@ static void draw(BoidsGui *gui)
 
 	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
 		Boid *b = swarm_get_boid(gui->swarm, i);
-		draw_boid(gui, b);
+		draw_boid(gui->cr, b);
 	}
 }
 
