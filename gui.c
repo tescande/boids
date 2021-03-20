@@ -6,11 +6,11 @@
 
 #define DEBUG_VECT_FACTOR 20
 
-#define BG_GRAY 0.8
-
 typedef struct {
 	GtkWidget *drawing_area;
 	cairo_surface_t *surface;
+	cairo_surface_t *boids_surface;
+	cairo_t *boids_cr;
 	cairo_surface_t *bg_surface;
 	cairo_t *cr;
 
@@ -129,20 +129,35 @@ static void draw_boid(cairo_t *cr, Boid *b)
 static void draw(BoidsGui *gui)
 {
 	int i;
+	cairo_operator_t op;
+	gdouble alpha;
 
-	if (!swarm_thread_running(gui->swarm))
-		cairo_set_source_rgba(gui->cr, BG_GRAY, BG_GRAY, BG_GRAY, 1.0);
-	else
-		cairo_set_source_surface(gui->cr, gui->bg_surface, 0, 0);
-
+	cairo_set_source_surface(gui->cr, gui->bg_surface, 0, 0);
 	cairo_paint(gui->cr);
 
 	draw_obstacles(gui);
 
+	if (swarm_thread_running(gui->swarm)) {
+		op = CAIRO_OPERATOR_DEST_IN;
+		alpha = 0.5;
+	} else {
+		op = CAIRO_OPERATOR_CLEAR;
+		alpha = 1.0;
+	}
+
+	cairo_save(gui->boids_cr);
+	cairo_set_operator(gui->boids_cr, op);
+	cairo_set_source_rgba(gui->boids_cr, 1.0, 1.0, 1.0, alpha);
+	cairo_paint(gui->boids_cr);
+	cairo_restore(gui->boids_cr);
+
 	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
 		Boid *b = swarm_get_boid(gui->swarm, i);
-		draw_boid(gui->cr, b);
+		draw_boid(gui->boids_cr, b);
 	}
+
+	cairo_set_source_surface(gui->cr, gui->boids_surface, 0, 0);
+	cairo_paint(gui->cr);
 }
 
 #define DELAY 20000
@@ -191,11 +206,87 @@ static gboolean queue_draw(BoidsGui *gui)
 	return swarm_thread_running(gui->swarm);
 }
 
+static void draw_background(BoidsGui *gui)
+{
+	static gdouble rgb[4][3];
+	static int full_color = -1;
+	cairo_t *bg_cr;
+	cairo_pattern_t *pattern;
+	int width, height;
+	int i;
+
+	swarm_get_sizes(gui->swarm, &width, &height);
+
+	bg_cr = cairo_create(gui->bg_surface);
+
+	/*
+	 * Choose which RGB components vary
+	 * One of them will be full (1.0)
+	 * The 2 others vary with x and y, from .3 to .6
+	 */
+	if (full_color < 0) {
+		int x_color, y_color;
+		int corner_index;
+
+		full_color = g_random_int_range(0, 3);
+		x_color = (full_color == 0) ? 1 : 0;
+		y_color = (x_color + full_color) ^ 0x3;
+
+		#define SET_RGB(_rgb, _x_val, _y_val) \
+				(_rgb)[full_color] = 1.0; \
+				(_rgb)[x_color] = _x_val; \
+				(_rgb)[y_color] = _y_val;
+		#define MIN_VAL 0.2
+		#define MAX_VAL 0.8
+
+		corner_index = g_random_int_range(0, 4);
+		SET_RGB(rgb[corner_index], MIN_VAL, MIN_VAL);
+
+		corner_index = (corner_index + 1) & 3;
+		SET_RGB(rgb[corner_index], MAX_VAL, MIN_VAL);
+
+		corner_index = (corner_index + 1) & 3;
+		SET_RGB(rgb[corner_index], MAX_VAL, MAX_VAL);
+
+		corner_index = (corner_index + 1) & 3;
+		SET_RGB(rgb[corner_index], MIN_VAL, MAX_VAL);
+
+		#undef SET_RGB
+		#undef MIN_VAL
+		#undef MAX_VAL
+	}
+
+	pattern = cairo_pattern_create_mesh();
+	cairo_mesh_pattern_begin_patch(pattern);
+
+	/* Define pattern corners to fill the entire area */
+	cairo_mesh_pattern_move_to(pattern, 0, 0);
+	cairo_mesh_pattern_line_to(pattern, width, 0);
+	cairo_mesh_pattern_line_to(pattern, width, height);
+	cairo_mesh_pattern_line_to(pattern, 0, height);
+
+	/* Set corner colors from the randomly filled rgb array */
+	for (i = 0; i < 4; i++) {
+		cairo_mesh_pattern_set_corner_color_rgb(pattern, i,
+							rgb[i][0],
+							rgb[i][1],
+							rgb[i][2]);
+	}
+
+	cairo_mesh_pattern_end_patch(pattern);
+
+	cairo_rectangle(bg_cr, 0, 0, width, height);
+	cairo_set_source(bg_cr, pattern);
+	cairo_fill(bg_cr);
+	cairo_pattern_destroy(pattern);
+
+	cairo_destroy(bg_cr);
+}
+
 static void cairo_init(BoidsGui *gui)
 {
 	gint width;
 	gint height;
-	cairo_t *bg_cr;
 
 	swarm_get_sizes(gui->swarm, &width, &height);
 
@@ -208,13 +299,15 @@ static void cairo_init(BoidsGui *gui)
 						  width, height);
 	gui->cr = cairo_create(gui->surface);
 
+	gui->boids_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+							width, height);
+
+	gui->boids_cr = cairo_create(gui->boids_surface);
+
 	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 						     width, height);
-	bg_cr = cairo_create(gui->bg_surface);
 
-	cairo_set_source_rgba(bg_cr, BG_GRAY, BG_GRAY, BG_GRAY, .5);
-	cairo_paint(bg_cr);
-	cairo_destroy(bg_cr);
+	draw_background(gui);
 
 	draw(gui);
 
@@ -650,6 +743,8 @@ int gtk_boids_run(Swarm *swarm)
 		g_object_unref(gui->timing_label);
 
 	g_object_unref(gui->drawing_area);
+	cairo_destroy(gui->boids_cr);
+	cairo_surface_destroy(gui->boids_surface);
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
 
