@@ -181,7 +181,8 @@ static gboolean queue_draw(BoidsGui *gui)
 {
 	if (swarm_show_debug_controls(gui->swarm)) {
 		gchar label[32];
-		g_snprintf(label, 32, "%2ldms", gui->compute_time / 1000);
+		g_snprintf(label, 32, "%2ldms, %ld fps", gui->compute_time / 1000,
+			    gui->compute_time ? 1000000 / gui->compute_time : 0);
 		gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
 	}
 
