@@ -370,6 +370,18 @@ static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 	}
 }
 
+static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
+{
+	swarm_set_bg_color(gui->swarm, gtk_combo_box_get_active(combo));
+
+	cairo_init(gui);
+
+	if (!swarm_thread_running(gui->swarm)) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+}
+
 static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
@@ -570,6 +582,7 @@ static void gui_show(BoidsGui *gui)
 	GtkWidget *separator;
 	GtkWidget *check;
 	GtkWidget *radio;
+	GtkWidget *combo;
 	gboolean active;
 	gint width;
 	gint height;
@@ -645,6 +658,22 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_walls_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	label = gtk_label_new("Background:");
+	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+
+	combo = gtk_combo_box_text_new();
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Red");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Green");
+	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Blue");
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), swarm_get_bg_color(gui->swarm));
+	g_signal_connect(G_OBJECT(combo), "changed",
+			 G_CALLBACK(on_bg_color_changed), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
