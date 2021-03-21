@@ -210,6 +210,7 @@ static void draw_background(BoidsGui *gui)
 {
 	static gdouble rgb[4][3];
 	static int full_color = -1;
+	int bg_color;
 	cairo_t *bg_cr;
 	cairo_pattern_t *pattern;
 	int width, height;
@@ -220,15 +221,15 @@ static void draw_background(BoidsGui *gui)
 	bg_cr = cairo_create(gui->bg_surface);
 
 	/*
-	 * Choose which RGB components vary
-	 * One of them will be full (1.0)
+	 * Get the dominant color
 	 * The 2 others vary with x and y, from .3 to .6
 	 */
-	if (full_color < 0) {
+	bg_color = swarm_get_bg_color(gui->swarm);
+	if (full_color != bg_color) {
 		int x_color, y_color;
 		int corner_index;
 
-		full_color = g_random_int_range(0, 3);
+		full_color = bg_color;
 		x_color = (full_color == 0) ? 1 : 0;
 		y_color = (x_color + full_color) ^ 0x3;
 

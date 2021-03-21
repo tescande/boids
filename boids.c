@@ -39,6 +39,7 @@ int main(int argc, char **argv)
 	swarm_rule_set_active(swarm, RULE_AVOID, TRUE);
 	swarm_rule_set_active(swarm, RULE_ALIGN, TRUE);
 	swarm_rule_set_active(swarm, RULE_COHESION, TRUE);
+	swarm_set_bg_color(swarm, -1);
 
 	gtk_boids_run(swarm);
 
