@@ -1,6 +1,34 @@
 /* SPDX-License-Identifier: MIT */
 #include "boids.h"
 
+static int get_bg_color(const gchar *color)
+{
+	int res;
+
+	if (!color)
+		return -1;
+
+	switch (*color) {
+	case 'r':
+	case 'R':
+		res = BG_COLOR_RED;
+		break;
+	case 'g':
+	case 'G':
+		res = BG_COLOR_GREEN;
+		break;
+	case 'b':
+	case 'B':
+		res = BG_COLOR_BLUE;
+		break;
+	default:
+		res = -1;
+		break;
+	}
+
+	return res;
+}
+
 int main(int argc, char **argv)
 {
 	Swarm *swarm;
@@ -8,6 +36,7 @@ int main(int argc, char **argv)
 	int seed = 0;
 	gboolean walls = FALSE;
 	gboolean debug = FALSE;
+	gchar *bg_color_name = NULL;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry entries[] = {
@@ -17,6 +46,8 @@ int main(int argc, char **argv)
 		  "Add walls to the field", NULL },
 		{ "rand-seed", 's', 0, G_OPTION_ARG_INT, &seed,
 		  "Random seed value", "VAL" },
+		{ "bg-color", 'b', 0, G_OPTION_ARG_STRING, &bg_color_name,
+		  "Background color", "red|green|blue" },
 		{ "debug-controls", 'd', 0, G_OPTION_ARG_NONE, &debug,
 		  "Enable debug controls", NULL },
 		{ NULL }
@@ -39,7 +70,8 @@ int main(int argc, char **argv)
 	swarm_rule_set_active(swarm, RULE_AVOID, TRUE);
 	swarm_rule_set_active(swarm, RULE_ALIGN, TRUE);
 	swarm_rule_set_active(swarm, RULE_COHESION, TRUE);
-	swarm_set_bg_color(swarm, -1);
+	swarm_set_bg_color(swarm, get_bg_color(bg_color_name));
+	g_free(bg_color_name);
 
 	gtk_boids_run(swarm);
 
