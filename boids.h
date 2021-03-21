@@ -10,6 +10,12 @@
 #define DEFAULT_WIDTH  1024
 #define DEFAULT_HEIGHT 576
 
+#define BG_COLOR_RED   0
+#define BG_COLOR_GREEN 1
+#define BG_COLOR_BLUE  2
+#define BG_COLOR_MIN   0
+#define BG_COLOR_MAX   2
+
 #define DEFAULT_NUM_BOIDS 300
 #define MIN_BOIDS 1
 #define MAX_BOIDS 1000
@@ -73,6 +79,8 @@ typedef struct _Swarm {
 
 	gint width;
 	gint height;
+
+	gint bg_color;
 
 	gboolean walls;
 
@@ -163,6 +171,9 @@ void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode);
 
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
+
+void swarm_set_bg_color(Swarm *swarm, int color);
+int swarm_get_bg_color(Swarm *swarm);
 
 #define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
