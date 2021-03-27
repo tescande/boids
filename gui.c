@@ -667,9 +667,9 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 	combo = gtk_combo_box_text_new();
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Red");
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Green");
-	gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(combo), NULL, "Blue");
+	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_REDDISH, NULL, "Reddish");
+	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_GREENISH, NULL, "Greenisg");
+	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_BLUISH, NULL, "Bluish");
 	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), swarm_get_bg_color(gui->swarm));
 	g_signal_connect(G_OBJECT(combo), "changed",
 			 G_CALLBACK(on_bg_color_changed), gui);

@@ -10,9 +10,9 @@
 #define DEFAULT_WIDTH  1024
 #define DEFAULT_HEIGHT 576
 
-#define BG_COLOR_RED   0
-#define BG_COLOR_GREEN 1
-#define BG_COLOR_BLUE  2
+#define BG_COLOR_REDDISH  0
+#define BG_COLOR_GREENISH 1
+#define BG_COLOR_BLUISH   2
 #define BG_COLOR_MIN   0
 #define BG_COLOR_MAX   2
 

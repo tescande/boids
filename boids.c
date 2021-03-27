@@ -11,15 +11,15 @@ static int get_bg_color(const gchar *color)
 	switch (*color) {
 	case 'r':
 	case 'R':
-		res = BG_COLOR_RED;
+		res = BG_COLOR_REDDISH;
 		break;
 	case 'g':
 	case 'G':
-		res = BG_COLOR_GREEN;
+		res = BG_COLOR_GREENISH;
 		break;
 	case 'b':
 	case 'B':
-		res = BG_COLOR_BLUE;
+		res = BG_COLOR_BLUISH;
 		break;
 	default:
 		res = -1;
