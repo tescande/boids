@@ -16,6 +16,8 @@
 #define BG_COLOR_BLUISH   3
 #define BG_COLOR_MIN   0
 #define BG_COLOR_MAX   3
+#define BG_COLOR_RND_MIN   1
+#define BG_COLOR_RND_MAX   3
 
 #define DEFAULT_NUM_BOIDS 300
 #define MIN_BOIDS 1
