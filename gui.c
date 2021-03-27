@@ -214,7 +214,7 @@ static void draw_background(BoidsGui *gui)
 	int y_color;
 	int bg_color;
 	cairo_t *bg_cr;
-	cairo_pattern_t *pattern;
+	cairo_pattern_t *pattern = NULL;
 	int width, height;
 
 	swarm_get_sizes(gui->swarm, &width, &height);
@@ -227,61 +227,65 @@ static void draw_background(BoidsGui *gui)
 	 */
 	bg_color = swarm_get_bg_color(gui->swarm);
 
-	pattern = cairo_pattern_create_mesh();
-	cairo_mesh_pattern_begin_patch(pattern);
+	if (bg_color == BG_COLOR_WHITE) {
+		cairo_set_source_rgb(bg_cr, 1, 1, 1);
+	} else {
+		pattern = cairo_pattern_create_mesh();
+		cairo_mesh_pattern_begin_patch(pattern);
 
-	/* Define pattern corners to fill the entire area */
-	cairo_mesh_pattern_move_to(pattern, 0, 0);
-	cairo_mesh_pattern_line_to(pattern, width, 0);
-	cairo_mesh_pattern_line_to(pattern, width, height);
-	cairo_mesh_pattern_line_to(pattern, 0, height);
+		/* Define pattern corners to fill the entire area */
+		cairo_mesh_pattern_move_to(pattern, 0, 0);
+		cairo_mesh_pattern_line_to(pattern, width, 0);
+		cairo_mesh_pattern_line_to(pattern, width, height);
+		cairo_mesh_pattern_line_to(pattern, 0, height);
 
-	switch (bg_color) {
-	case BG_COLOR_REDDISH:
-		full_color = 0;
-		x_color = 1;
-		y_color = 2;
-		break;
-	case BG_COLOR_GREENISH:
-		x_color = 0;
-		full_color = 1;
-		y_color = 2;
-		break;
-	default:
-	case BG_COLOR_BLUISH:
-		y_color = 0;
-		x_color = 1;
-		full_color = 2;
-		break;
+		switch (bg_color) {
+		case BG_COLOR_REDDISH:
+			full_color = 0;
+			x_color = 1;
+			y_color = 2;
+			break;
+		case BG_COLOR_GREENISH:
+			x_color = 0;
+			full_color = 1;
+			y_color = 2;
+			break;
+		default:
+		case BG_COLOR_BLUISH:
+			y_color = 0;
+			x_color = 1;
+			full_color = 2;
+			break;
+		}
+
+		#define SET_RGB(_rgb, _x_val, _y_val) \
+				(_rgb)[full_color] = 1.0; \
+				(_rgb)[x_color] = _x_val; \
+				(_rgb)[y_color] = _y_val;
+		#define MIN_VAL 0.2
+		#define MAX_VAL 0.7
+
+		SET_RGB(rgb, MIN_VAL, MIN_VAL);
+		cairo_mesh_pattern_set_corner_color_rgb(pattern, 0,
+							rgb[0], rgb[1], rgb[2]);
+		SET_RGB(rgb, MAX_VAL, MIN_VAL);
+		cairo_mesh_pattern_set_corner_color_rgb(pattern, 1,
+							rgb[0], rgb[1], rgb[2]);
+		SET_RGB(rgb, MAX_VAL, MAX_VAL);
+		cairo_mesh_pattern_set_corner_color_rgb(pattern, 2,
+							rgb[0], rgb[1], rgb[2]);
+		SET_RGB(rgb, MIN_VAL, MAX_VAL);
+		cairo_mesh_pattern_set_corner_color_rgb(pattern, 3,
+							rgb[0], rgb[1], rgb[2]);
+
+		#undef SET_RGB
+		#undef MIN_VAL
+		#undef MAX_VAL
+
+		cairo_mesh_pattern_end_patch(pattern);
+
+		cairo_set_source(bg_cr, pattern);
 	}
-
-	#define SET_RGB(_rgb, _x_val, _y_val) \
-			(_rgb)[full_color] = 1.0; \
-			(_rgb)[x_color] = _x_val; \
-			(_rgb)[y_color] = _y_val;
-	#define MIN_VAL 0.2
-	#define MAX_VAL 0.7
-
-	SET_RGB(rgb, MIN_VAL, MIN_VAL);
-	cairo_mesh_pattern_set_corner_color_rgb(pattern, 0,
-						rgb[0], rgb[1], rgb[2]);
-	SET_RGB(rgb, MAX_VAL, MIN_VAL);
-	cairo_mesh_pattern_set_corner_color_rgb(pattern, 1,
-						rgb[0], rgb[1], rgb[2]);
-	SET_RGB(rgb, MAX_VAL, MAX_VAL);
-	cairo_mesh_pattern_set_corner_color_rgb(pattern, 2,
-						rgb[0], rgb[1], rgb[2]);
-	SET_RGB(rgb, MIN_VAL, MAX_VAL);
-	cairo_mesh_pattern_set_corner_color_rgb(pattern, 3,
-						rgb[0], rgb[1], rgb[2]);
-
-	#undef SET_RGB
-	#undef MIN_VAL
-	#undef MAX_VAL
-
-	cairo_mesh_pattern_end_patch(pattern);
-
-	cairo_set_source(bg_cr, pattern);
 
 	cairo_rectangle(bg_cr, 0, 0, width, height);
 	cairo_fill(bg_cr);
@@ -675,6 +679,7 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
 	combo = gtk_combo_box_text_new();
+	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_WHITE, NULL, "White");
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_REDDISH, NULL, "Reddish");
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_GREENISH, NULL, "Greenisg");
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_BLUISH, NULL, "Bluish");

@@ -21,6 +21,10 @@ static int get_bg_color(const gchar *color)
 	case 'B':
 		res = BG_COLOR_BLUISH;
 		break;
+	case 'w':
+	case 'W':
+		res = BG_COLOR_WHITE;
+		break;
 	default:
 		res = -1;
 		break;
