@@ -374,7 +374,9 @@ static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
 {
 	swarm_set_bg_color(gui->swarm, gtk_combo_box_get_active(combo));
 
-	cairo_init(gui);
+	g_mutex_lock(&gui->lock);
+	draw_background(gui);
+	g_mutex_unlock(&gui->lock);
 
 	if (!swarm_thread_running(gui->swarm)) {
 		draw(gui);
