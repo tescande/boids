@@ -208,13 +208,14 @@ static gboolean queue_draw(BoidsGui *gui)
 
 static void draw_background(BoidsGui *gui)
 {
-	static gdouble rgb[4][3];
-	static int full_color = -1;
+	gdouble rgb[3];
+	int full_color;
+	int x_color;
+	int y_color;
 	int bg_color;
 	cairo_t *bg_cr;
 	cairo_pattern_t *pattern;
 	int width, height;
-	int i;
 
 	swarm_get_sizes(gui->swarm, &width, &height);
 
@@ -222,40 +223,9 @@ static void draw_background(BoidsGui *gui)
 
 	/*
 	 * Get the dominant color
-	 * The 2 others vary with x and y, from .3 to .6
+	 * The 2 others vary with x and y, from .2 to .7
 	 */
 	bg_color = swarm_get_bg_color(gui->swarm);
-	if (full_color != bg_color) {
-		int x_color, y_color;
-		int corner_index;
-
-		full_color = bg_color;
-		x_color = (full_color == 0) ? 1 : 0;
-		y_color = (x_color + full_color) ^ 0x3;
-
-		#define SET_RGB(_rgb, _x_val, _y_val) \
-				(_rgb)[full_color] = 1.0; \
-				(_rgb)[x_color] = _x_val; \
-				(_rgb)[y_color] = _y_val;
-		#define MIN_VAL 0.2
-		#define MAX_VAL 0.8
-
-		corner_index = g_random_int_range(0, 4);
-		SET_RGB(rgb[corner_index], MIN_VAL, MIN_VAL);
-
-		corner_index = (corner_index + 1) & 3;
-		SET_RGB(rgb[corner_index], MAX_VAL, MIN_VAL);
-
-		corner_index = (corner_index + 1) & 3;
-		SET_RGB(rgb[corner_index], MAX_VAL, MAX_VAL);
-
-		corner_index = (corner_index + 1) & 3;
-		SET_RGB(rgb[corner_index], MIN_VAL, MAX_VAL);
-
-		#undef SET_RGB
-		#undef MIN_VAL
-		#undef MAX_VAL
-	}
 
 	pattern = cairo_pattern_create_mesh();
 	cairo_mesh_pattern_begin_patch(pattern);
@@ -266,18 +236,54 @@ static void draw_background(BoidsGui *gui)
 	cairo_mesh_pattern_line_to(pattern, width, height);
 	cairo_mesh_pattern_line_to(pattern, 0, height);
 
-	/* Set corner colors from the randomly filled rgb array */
-	for (i = 0; i < 4; i++) {
-		cairo_mesh_pattern_set_corner_color_rgb(pattern, i,
-							rgb[i][0],
-							rgb[i][1],
-							rgb[i][2]);
+	switch (bg_color) {
+	case BG_COLOR_REDDISH:
+		full_color = 0;
+		x_color = 1;
+		y_color = 2;
+		break;
+	case BG_COLOR_GREENISH:
+		x_color = 0;
+		full_color = 1;
+		y_color = 2;
+		break;
+	default:
+	case BG_COLOR_BLUISH:
+		y_color = 0;
+		x_color = 1;
+		full_color = 2;
+		break;
 	}
+
+	#define SET_RGB(_rgb, _x_val, _y_val) \
+			(_rgb)[full_color] = 1.0; \
+			(_rgb)[x_color] = _x_val; \
+			(_rgb)[y_color] = _y_val;
+	#define MIN_VAL 0.2
+	#define MAX_VAL 0.7
+
+	SET_RGB(rgb, MIN_VAL, MIN_VAL);
+	cairo_mesh_pattern_set_corner_color_rgb(pattern, 0,
+						rgb[0], rgb[1], rgb[2]);
+	SET_RGB(rgb, MAX_VAL, MIN_VAL);
+	cairo_mesh_pattern_set_corner_color_rgb(pattern, 1,
+						rgb[0], rgb[1], rgb[2]);
+	SET_RGB(rgb, MAX_VAL, MAX_VAL);
+	cairo_mesh_pattern_set_corner_color_rgb(pattern, 2,
+						rgb[0], rgb[1], rgb[2]);
+	SET_RGB(rgb, MIN_VAL, MAX_VAL);
+	cairo_mesh_pattern_set_corner_color_rgb(pattern, 3,
+						rgb[0], rgb[1], rgb[2]);
+
+	#undef SET_RGB
+	#undef MIN_VAL
+	#undef MAX_VAL
 
 	cairo_mesh_pattern_end_patch(pattern);
 
-	cairo_rectangle(bg_cr, 0, 0, width, height);
 	cairo_set_source(bg_cr, pattern);
+
+	cairo_rectangle(bg_cr, 0, 0, width, height);
 	cairo_fill(bg_cr);
 	cairo_pattern_destroy(pattern);
 
