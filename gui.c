@@ -8,6 +8,7 @@
 
 typedef struct {
 	GtkWidget *drawing_area;
+	GtkToggleButton *walls_check;
 	cairo_surface_t *surface;
 	cairo_surface_t *boids_surface;
 	cairo_t *boids_cr;
@@ -100,7 +101,8 @@ static void draw_obstacles(BoidsGui *gui)
 		Obstacle *o = swarm_obstacle_get(gui->swarm, i);
 
 		if (o->type == OBSTACLE_TYPE_WALL ||
-		    o->type == OBSTACLE_TYPE_SCARY_MOUSE)
+		    o->type == OBSTACLE_TYPE_SCARY_MOUSE ||
+		    o->type == OBSTACLE_TYPE_PREDATOR)
 			continue;
 
 		cairo_arc(gui->cr, o->pos.x, o->pos.y, OBSTACLE_RADIUS, 0, 2 * G_PI);
@@ -126,6 +128,40 @@ static void draw_boid(cairo_t *cr, Boid *b)
 	cairo_line_to(cr, bottom.x, bottom.y);
 	cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
 	cairo_stroke(cr);
+}
+
+static void draw_predator(BoidsGui *gui)
+{
+	gdouble predator_rgb[][3] = {
+		[BG_COLOR_WHITE]    = { 0.6, 0.6, 0.6 },
+		[BG_COLOR_REDDISH]  = { 0.0, 1.0, 1.0 },
+		[BG_COLOR_GREENISH] = { 1.0, 0.0, 0.8 },
+		[BG_COLOR_BLUISH]   = { 1.0, 1.0, 0.0 },
+	};
+	Obstacle *predator;
+	Vector top;
+	Vector bottom;
+	Vector length;
+	gdouble *rgb;
+
+	predator = swarm_get_obstacle_by_type(gui->swarm, OBSTACLE_TYPE_PREDATOR);
+	if (!predator)
+		return;
+
+	rgb = predator_rgb[swarm_get_bg_color(gui->swarm)];
+
+	top = bottom = predator->pos;
+	length = predator->velocity;
+	vector_set_mag(&length, 4);
+	vector_add(&top, &length);
+	vector_sub(&bottom, &length);
+
+	cairo_set_line_width(gui->boids_cr, 7);
+	cairo_set_line_cap(gui->boids_cr, CAIRO_LINE_CAP_ROUND);
+	cairo_move_to(gui->boids_cr, top.x, top.y);
+	cairo_line_to(gui->boids_cr, bottom.x, bottom.y);
+	cairo_set_source_rgb(gui->boids_cr, rgb[0], rgb[1], rgb[2]);
+	cairo_stroke(gui->boids_cr);
 }
 
 static void draw(BoidsGui *gui)
@@ -159,6 +195,8 @@ static void draw(BoidsGui *gui)
 		Boid *b = swarm_get_boid(gui->swarm, i);
 		draw_boid(gui->boids_cr, b);
 	}
+
+	draw_predator(gui);
 
 	cairo_set_source_surface(gui->cr, gui->boids_surface, 0, 0);
 	cairo_paint(gui->cr);
@@ -513,6 +551,23 @@ static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 	return TRUE;
 }
 
+static void on_predator_clicked(GtkToggleButton *button, BoidsGui *gui)
+{
+	gboolean enable = gtk_toggle_button_get_active(button);
+
+	if (enable && gtk_toggle_button_get_active(gui->walls_check))
+		gtk_toggle_button_set_active(gui->walls_check, FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(gui->walls_check), !enable);
+
+	swarm_predator_enable(gui->swarm, enable);
+
+	if (!swarm_thread_running(gui->swarm)) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+}
+
+
 static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
 	swarm_set_debug_vectors(gui->swarm, gtk_toggle_button_get_active(button));
@@ -689,6 +744,7 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_walls_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->walls_check = GTK_TOGGLE_BUTTON(check);
 
 	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
@@ -781,6 +837,14 @@ static void gui_show(BoidsGui *gui)
 	g_signal_connect(G_OBJECT(radio), "toggled",
 			 G_CALLBACK(on_mouse_mode_attractive_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), radio, FALSE, FALSE, 0);
+
+	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
+	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
+
+	check = gtk_check_button_new_with_label("Predator");
+	g_signal_connect(G_OBJECT(check), "toggled",
+			 G_CALLBACK(on_predator_clicked), gui);
+	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
 
 	if (swarm_show_debug_controls(gui->swarm))
 		gui_show_debug_controls(gui, vbox);
