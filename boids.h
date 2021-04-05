@@ -182,6 +182,7 @@ int swarm_get_bg_color(Swarm *swarm);
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
 #define swarm_obstacle_get_type(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).type)
 #define swarm_num_obstacles(swarm) ((swarm)->obstacles->len)
+Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type);
 
 void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
 void swarm_thread_stop(Swarm *swarm);
