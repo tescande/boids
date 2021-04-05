@@ -36,6 +36,54 @@ static gboolean swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *directio
 	return TRUE;
 }
 
+static void swarm_move_predator(Swarm *swarm)
+{
+	Obstacle *predator;
+	Vector cohesion;
+	Boid *b;
+	int i;
+	int cohesion_n;
+	gdouble dx, dy;
+	gdouble dist;
+
+	if (!swarm->predator)
+		return;
+
+	predator = swarm_get_obstacle_by_type(swarm, OBSTACLE_TYPE_PREDATOR);
+
+	vector_init(&cohesion);
+	cohesion_n = 0;
+
+	for (i = 0; i < swarm_get_num_boids(swarm); i++) {
+		b = swarm_get_boid(swarm, i);
+
+		dx = predator->pos.x - b->pos.x;
+		dy = predator->pos.y - b->pos.y;
+		dist = POW2(dx) + POW2(dy);
+		if (dist >= POW2(swarm->cohesion_dist))
+			continue;
+
+		cohesion_n++;
+		vector_add(&cohesion, &b->pos);
+	}
+
+	if (cohesion_n) {
+		vector_div(&cohesion, cohesion_n);
+		vector_sub(&cohesion, &predator->pos);
+		vector_set_mag(&cohesion, 0.5);
+	} else {
+		cohesion = predator->velocity;
+	}
+
+	vector_add(&predator->velocity, &cohesion);
+	vector_set_mag(&predator->velocity,
+		       swarm->speed * (cohesion_n ? 1.2 : 0.8));
+	vector_add(&predator->pos, &predator->velocity);
+
+	predator->pos.x = fmod(predator->pos.x + swarm->width, swarm->width);
+	predator->pos.y = fmod(predator->pos.y + swarm->height, swarm->height);
+}
+
 void swarm_move(Swarm *swarm)
 {
 	int i;
@@ -52,6 +100,8 @@ void swarm_move(Swarm *swarm)
 	Vector align;
 	Vector cohesion;
 	Vector v;
+
+	swarm_move_predator(swarm);
 
 	for (i = 0; i < swarm_get_num_boids(swarm); i++) {
 		b1 = swarm_get_boid(swarm, i);
@@ -196,6 +246,27 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 			new.avoid_radius = POW2(OBSTACLE_RADIUS * 10);
 			g_array_prepend_val(swarm->obstacles, new);
 		}
+
+		return;
+	}
+
+	if (swarm->predator)
+		return;
+
+	if (type == OBSTACLE_TYPE_PREDATOR) {
+		if (swarm_get_obstacle_by_type(swarm, type) != NULL)
+			return;
+
+		/* Remove obstacles and walls */
+		swarm_remove_obstacle_by_type(swarm, OBSTACLE_TYPE_WALL);
+		swarm_remove_obstacle_by_type(swarm, OBSTACLE_TYPE_IN_FIELD);
+
+		new.velocity.x = 1;
+		new.velocity.y = 0;
+		new.avoid_radius = POW2(OBSTACLE_RADIUS * 5);
+		g_array_prepend_val(swarm->obstacles, new);
+
+		swarm->predator = TRUE;
 
 		return;
 	}
@@ -513,6 +584,17 @@ void swarm_set_bg_color(Swarm *swarm, int bg_color)
 int swarm_get_bg_color(Swarm *swarm)
 {
 	return swarm->bg_color;
+}
+
+void swarm_predator_enable(Swarm *swarm, gboolean enable)
+{
+	if (enable)
+		swarm_add_obstacle(swarm, swarm->width >> 1, swarm->height >> 1,
+				   OBSTACLE_TYPE_PREDATOR);
+	else
+		swarm_remove_obstacle_by_type(swarm, OBSTACLE_TYPE_PREDATOR);
+
+	swarm->predator = enable;
 }
 
 static int swarm_move_thread(Swarm *swarm)

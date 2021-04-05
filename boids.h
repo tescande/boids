@@ -60,11 +60,14 @@ typedef enum {
 	OBSTACLE_TYPE_IN_FIELD = 0,
 	OBSTACLE_TYPE_WALL,
 	OBSTACLE_TYPE_SCARY_MOUSE,
+	OBSTACLE_TYPE_PREDATOR,
 } ObstacleType;
 
 typedef struct {
 	ObstacleType type;
 	Vector pos;
+	/* The predator is a moving obstacle and needs a velocity vector */
+	Vector velocity;
 	/*
 	 * avoid_radius is actually the power of 2 of the avoid radius value
 	 * to save a sqrt() call for distance comparison
@@ -106,6 +109,8 @@ typedef struct _Swarm {
 	Vector mouse_pos;
 	gboolean scary_mouse;
 	gboolean attractive_mouse;
+
+	gboolean predator;
 
 	gboolean debug_controls;
 	gboolean debug_vectors;
@@ -177,6 +182,8 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
 void swarm_set_bg_color(Swarm *swarm, int color);
 int swarm_get_bg_color(Swarm *swarm);
+
+void swarm_predator_enable(Swarm *swarm, gboolean enable);
 
 #define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
