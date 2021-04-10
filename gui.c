@@ -11,6 +11,8 @@ typedef struct {
 	cairo_surface_t *surface;
 	cairo_surface_t *boids_surface;
 	cairo_t *boids_cr;
+	cairo_operator_t boids_cr_operator;
+	gdouble boids_cr_alpha;
 	cairo_surface_t *bg_surface;
 	cairo_t *cr;
 
@@ -129,8 +131,6 @@ static void draw_boid(cairo_t *cr, Boid *b)
 static void draw(BoidsGui *gui)
 {
 	int i;
-	cairo_operator_t op;
-	gdouble alpha;
 
 	cairo_set_source_surface(gui->cr, gui->bg_surface, 0, 0);
 	cairo_paint(gui->cr);
@@ -149,17 +149,9 @@ static void draw(BoidsGui *gui)
 	 * opacity. This will erase the boid trails when the swarm is stopped.
 	 * See cairo_set_boids_draw_operator()
 	 */
-	if (swarm_thread_running(gui->swarm)) {
-		op = CAIRO_OPERATOR_DEST_OUT;
-		alpha = 0.5;
-	} else {
-		op = CAIRO_OPERATOR_CLEAR;
-		alpha = 1.0;
-	}
-
 	cairo_save(gui->boids_cr);
-	cairo_set_operator(gui->boids_cr, op);
-	cairo_set_source_rgba(gui->boids_cr, 1.0, 1.0, 1.0, alpha);
+	cairo_set_operator(gui->boids_cr, gui->boids_cr_operator);
+	cairo_set_source_rgba(gui->boids_cr, 1.0, 1.0, 1.0, gui->boids_cr_alpha);
 	cairo_paint(gui->boids_cr);
 	cairo_restore(gui->boids_cr);
 
@@ -306,6 +298,17 @@ static void draw_background(BoidsGui *gui)
 	cairo_destroy(bg_cr);
 }
 
+static void cairo_set_boids_draw_operator(BoidsGui *gui)
+{
+	if (swarm_thread_running(gui->swarm)) {
+		gui->boids_cr_operator = CAIRO_OPERATOR_DEST_OUT;
+		gui->boids_cr_alpha = 0.5;
+	} else {
+		gui->boids_cr_operator = CAIRO_OPERATOR_CLEAR;
+		gui->boids_cr_alpha = 1.0;
+	}
+}
+
 static void cairo_init(BoidsGui *gui)
 {
 	gint width;
@@ -330,6 +333,8 @@ static void cairo_init(BoidsGui *gui)
 	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 						     width, height);
 
+	cairo_set_boids_draw_operator(gui);
+
 	draw_background(gui);
 
 	draw(gui);
@@ -342,12 +347,14 @@ static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 	if (swarm_thread_running(gui->swarm)) {
 		swarm_thread_stop(gui->swarm);
 		gtk_button_set_label(button, "Start");
+		cairo_set_boids_draw_operator(gui);
 		draw(gui);
 		return;
 	}
 
 	gtk_button_set_label(button, "Stop");
 	swarm_thread_start(gui->swarm, (SwarmAnimateFunc)animate_cb, gui);
+	cairo_set_boids_draw_operator(gui);
 	g_timeout_add(10, (GSourceFunc)queue_draw, gui);
 }
 
