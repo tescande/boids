@@ -137,8 +137,20 @@ static void draw(BoidsGui *gui)
 
 	draw_obstacles(gui);
 
+	/*
+	 * Draw the boid trail effect.
+	 * This is done by partially erasing the boids previously drawn by
+	 * painting the entrire the boids surface using the cairo operator
+	 * CAIRO_OPERATOR_DEST_OUT with an alpha value of 0.5. The color doesn't
+	 * matter as the DEST_OUT operator only affects the destination, i.e.
+	 * the already painted boids on the surface. Then the boids are drawn at
+	 * their new positions.
+	 * If the swarm is not running, the operator is set to CLEAR with full
+	 * opacity. This will erase the boid trails when the swarm is stopped.
+	 * See cairo_set_boids_draw_operator()
+	 */
 	if (swarm_thread_running(gui->swarm)) {
-		op = CAIRO_OPERATOR_DEST_IN;
+		op = CAIRO_OPERATOR_DEST_OUT;
 		alpha = 0.5;
 	} else {
 		op = CAIRO_OPERATOR_CLEAR;
