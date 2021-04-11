@@ -359,6 +359,11 @@ static void cairo_init(BoidsGui *gui)
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
 
+	cairo_destroy(gui->boids_cr);
+	cairo_surface_destroy(gui->boids_surface);
+
+	cairo_surface_destroy(gui->bg_surface);
+
 	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 						  width, height);
 	gui->cr = cairo_create(gui->surface);
@@ -873,6 +878,7 @@ int gtk_boids_run(Swarm *swarm)
 	cairo_surface_destroy(gui->boids_surface);
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
+	cairo_surface_destroy(gui->bg_surface);
 
 	g_free(gui);
 
