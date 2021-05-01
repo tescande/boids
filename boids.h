@@ -146,14 +146,14 @@ void swarm_free(Swarm *swarm);
 void swarm_get_sizes(Swarm *swarm, gint *width, gint *height);
 void swarm_set_sizes(Swarm *swarm, guint width, guint height);
 
-gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule);
-void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active);
+gboolean swarm_get_rule_active(Swarm *swarm, SwarmRule rule);
+void swarm_set_rule_active(Swarm *swarm, SwarmRule rule, gboolean active);
 
 guint swarm_get_rule_dist(Swarm *swarm, SwarmRule rule);
 void swarm_set_rule_dist(Swarm *swarm, SwarmRule rule, guint dist);
 
-gboolean swarm_walls_get_enable(Swarm *swarm);
-void swarm_walls_set_enable(Swarm *swarm, gboolean enable);
+gboolean swarm_get_walls_enable(Swarm *swarm);
+void swarm_set_walls_enable(Swarm *swarm, gboolean enable);
 
 #define swarm_get_num_boids(swarm) ((swarm)->boids->len)
 void swarm_set_num_boids(Swarm *swarm, guint num);
@@ -176,9 +176,9 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 void swarm_set_predator_enable(Swarm *swarm, gboolean enable);
 gboolean swarm_get_predator_enable(Swarm *swarm);
 
-#define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
-#define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
-#define swarm_obstacle_get_type(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).type)
+#define swarm_get_obstacle(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
+#define swarm_get_obstacle_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))
+#define swarm_get_obstacle_type(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).type)
 #define swarm_num_obstacles(swarm) ((swarm)->obstacles->len)
 Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type);
 

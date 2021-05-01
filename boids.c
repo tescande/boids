@@ -122,11 +122,11 @@ int main(int argc, char **argv)
 	swarm = swarm_alloc();
 	swarm_set_debug_controls(swarm, debug);
 	swarm_set_num_boids(swarm, num_boids);
-	swarm_walls_set_enable(swarm, walls);
+	swarm_set_walls_enable(swarm, walls);
 	swarm_set_predator_enable(swarm, predator);
-	swarm_rule_set_active(swarm, RULE_AVOID, rule_avoid);
-	swarm_rule_set_active(swarm, RULE_ALIGN, rule_align);
-	swarm_rule_set_active(swarm, RULE_COHESION, rule_cohesion);
+	swarm_set_rule_active(swarm, RULE_AVOID, rule_avoid);
+	swarm_set_rule_active(swarm, RULE_ALIGN, rule_align);
+	swarm_set_rule_active(swarm, RULE_COHESION, rule_cohesion);
 
 	bg_color = get_bg_color(bg_color_name);
 	g_free(bg_color_name);

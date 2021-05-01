@@ -12,7 +12,7 @@ static gboolean swarm_avoid_obstacles(Swarm *swarm, Boid *boid, Vector *directio
 	vector_init(direction);
 
 	for (i = 0; i < swarm->obstacles->len; i++) {
-		obs = swarm_obstacle_get(swarm, i);
+		obs = swarm_get_obstacle(swarm, i);
 
 		dx = obs->pos.x - boid->pos.x;
 		dy = obs->pos.y - boid->pos.y;
@@ -204,7 +204,7 @@ Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type)
 	int i;
 
 	for (i = 0; i < swarm->obstacles->len; i++) {
-		o = swarm_obstacle_get(swarm, i);
+		o = swarm_get_obstacle(swarm, i);
 		if (o->type == type)
 			return o;
 	}
@@ -219,7 +219,7 @@ static void swarm_remove_obstacle_by_type(Swarm *swarm, guint type)
 
 	i = swarm->obstacles->len;
 	while (i--) {
-		o = swarm_obstacle_get(swarm, i);
+		o = swarm_get_obstacle(swarm, i);
 		if (o->type == type)
 			g_array_remove_index(swarm->obstacles, i);
 	}
@@ -274,7 +274,7 @@ void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint type)
 	i = swarm->obstacles->len;
 
 	while (i--) {
-		o = swarm_obstacle_get(swarm, i);
+		o = swarm_get_obstacle(swarm, i);
 
 		/* Ignore the scary mouse obstacle */
 		if (o->type == OBSTACLE_TYPE_SCARY_MOUSE)
@@ -301,7 +301,7 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y)
 
 	i = swarm->obstacles->len;
 	while (i--) {
-		o = swarm_obstacle_get(swarm, i);
+		o = swarm_get_obstacle(swarm, i);
 		/* Remove only field obstacle */
 		if (o->type != OBSTACLE_TYPE_IN_FIELD)
 			continue;
@@ -340,12 +340,12 @@ static void swarm_add_walls(Swarm *swarm)
 	}
 }
 
-gboolean swarm_walls_get_enable(Swarm *swarm)
+gboolean swarm_get_walls_enable(Swarm *swarm)
 {
 	return swarm->walls;
 }
 
-void swarm_walls_set_enable(Swarm *swarm, gboolean enable)
+void swarm_set_walls_enable(Swarm *swarm, gboolean enable)
 {
 	swarm->walls = enable;
 
@@ -363,7 +363,7 @@ void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y)
 
 	/* Update the scary mouse obstacle position */
 	if (swarm->scary_mouse && swarm_num_obstacles(swarm)) {
-		o = swarm_obstacle_get(swarm, 0);
+		o = swarm_get_obstacle(swarm, 0);
 		if (o->type == OBSTACLE_TYPE_SCARY_MOUSE)
 			vector_set(&o->pos, x, y);
 	}
@@ -477,7 +477,7 @@ void swarm_set_sizes(Swarm *swarm, guint width, guint height)
 	}
 }
 
-void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active)
+void swarm_set_rule_active(Swarm *swarm, SwarmRule rule, gboolean active)
 {
 	switch (rule) {
 	case RULE_AVOID:
@@ -495,7 +495,7 @@ void swarm_rule_set_active(Swarm *swarm, SwarmRule rule, gboolean active)
 	}
 }
 
-gboolean swarm_rule_get_active(Swarm *swarm, SwarmRule rule)
+gboolean swarm_get_rule_active(Swarm *swarm, SwarmRule rule)
 {
 	gboolean active = FALSE;
 
