@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 	Swarm *swarm;
 	int num_boids = DEFAULT_NUM_BOIDS;
 	int seed = 0;
+	int bg_color;
 	gboolean start = FALSE;
 	gboolean walls = FALSE;
 	gboolean debug = FALSE;
@@ -126,10 +127,11 @@ int main(int argc, char **argv)
 	swarm_rule_set_active(swarm, RULE_AVOID, rule_avoid);
 	swarm_rule_set_active(swarm, RULE_ALIGN, rule_align);
 	swarm_rule_set_active(swarm, RULE_COHESION, rule_cohesion);
-	swarm_set_bg_color(swarm, get_bg_color(bg_color_name));
+
+	bg_color = get_bg_color(bg_color_name);
 	g_free(bg_color_name);
 
-	gtk_boids_run(swarm, start);
+	gtk_boids_run(swarm, bg_color, start);
 
 	swarm_free(swarm);
 

@@ -16,6 +16,7 @@ typedef struct {
 	gdouble boids_cr_alpha;
 	cairo_surface_t *bg_surface;
 	cairo_t *cr;
+	gint bg_color;
 
 	gboolean running;
 
@@ -145,7 +146,7 @@ static void draw_predator(BoidsGui *gui)
 	if (!predator)
 		return;
 
-	rgb = predator_rgb[swarm_get_bg_color(gui->swarm)];
+	rgb = predator_rgb[gui->bg_color];
 
 	top = bottom = predator->pos;
 	length = predator->velocity;
@@ -218,7 +219,7 @@ static void draw_background(BoidsGui *gui)
 	 * Get the dominant color
 	 * The 2 others vary with x and y, from .2 to .7
 	 */
-	bg_color = swarm_get_bg_color(gui->swarm);
+	bg_color = gui->bg_color;
 
 	if (bg_color == BG_COLOR_WHITE) {
 		cairo_set_source_rgb(bg_cr, 1, 1, 1);
@@ -391,6 +392,15 @@ static gboolean gui_animate(BoidsGui *gui)
 	return TRUE;
 }
 
+static void gui_set_bg_color(BoidsGui *gui, gint bg_color)
+{
+	if (bg_color < BG_COLOR_MIN || bg_color > BG_COLOR_MAX)
+		bg_color = g_random_int_range(BG_COLOR_RND_MIN,
+					      BG_COLOR_RND_MAX + 1);
+
+	gui->bg_color = bg_color;
+}
+
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 {
 	if (gui->running) {
@@ -445,7 +455,7 @@ static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
 {
-	swarm_set_bg_color(gui->swarm, gtk_combo_box_get_active(combo));
+	gui_set_bg_color(gui, gtk_combo_box_get_active(combo));
 
 	draw_background(gui);
 
@@ -749,7 +759,7 @@ static void gui_show(BoidsGui *gui)
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_REDDISH, NULL, "Reddish");
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_GREENISH, NULL, "Greenish");
 	gtk_combo_box_text_insert(GTK_COMBO_BOX_TEXT(combo), BG_COLOR_BLUISH, NULL, "Bluish");
-	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), swarm_get_bg_color(gui->swarm));
+	gtk_combo_box_set_active(GTK_COMBO_BOX(combo), gui->bg_color);
 	g_signal_connect(G_OBJECT(combo), "changed",
 			 G_CALLBACK(on_bg_color_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), combo, FALSE, FALSE, 0);
@@ -843,13 +853,14 @@ static void gui_show(BoidsGui *gui)
 	gtk_widget_show_all(window);
 }
 
-int gtk_boids_run(Swarm *swarm, gboolean start)
+int gtk_boids_run(Swarm *swarm, int bg_color, gboolean start)
 {
 	BoidsGui *gui;
 
 	gui = g_malloc0(sizeof(*gui));
 	gui->swarm = swarm;
 	gui->running = start;
+	gui_set_bg_color(gui, bg_color);
 
 	gtk_init(0, NULL);
 	gui_show(gui);

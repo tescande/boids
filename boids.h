@@ -86,8 +86,6 @@ typedef struct _Swarm {
 	gint width;
 	gint height;
 
-	gint bg_color;
-
 	gboolean walls;
 
 	gboolean avoid;
@@ -175,9 +173,6 @@ void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode);
 void swarm_add_obstacle(Swarm *swarm, gdouble x, gdouble y, guint flags);
 gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 
-void swarm_set_bg_color(Swarm *swarm, int color);
-int swarm_get_bg_color(Swarm *swarm);
-
 void swarm_set_predator_enable(Swarm *swarm, gboolean enable);
 gboolean swarm_get_predator_enable(Swarm *swarm);
 
@@ -189,6 +184,6 @@ Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type);
 
 void swarm_move(Swarm *swarm);
 
-int gtk_boids_run(Swarm *swarm, gboolean start);
+int gtk_boids_run(Swarm *swarm, gint bg_color, gboolean start);
 
 #endif /* __BOIDS_H__ */

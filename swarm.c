@@ -572,20 +572,6 @@ guint swarm_get_rule_dist(Swarm *swarm, SwarmRule rule)
 	return dist;
 }
 
-void swarm_set_bg_color(Swarm *swarm, int bg_color)
-{
-	if (bg_color < BG_COLOR_MIN || bg_color > BG_COLOR_MAX)
-		bg_color = g_random_int_range(BG_COLOR_RND_MIN,
-					      BG_COLOR_RND_MAX + 1);
-
-	swarm->bg_color = bg_color;
-}
-
-int swarm_get_bg_color(Swarm *swarm)
-{
-	return swarm->bg_color;
-}
-
 void swarm_set_predator_enable(Swarm *swarm, gboolean enable)
 {
 	if (enable)
