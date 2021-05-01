@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 	Swarm *swarm;
 	int num_boids = DEFAULT_NUM_BOIDS;
 	int seed = 0;
+	gboolean start = FALSE;
 	gboolean walls = FALSE;
 	gboolean debug = FALSE;
 	gboolean predator = FALSE;
@@ -89,6 +90,8 @@ int main(int argc, char **argv)
 		  "Number of boids", "VAL" },
 		{ "rules", 'l', 0, G_OPTION_ARG_STRING, &rules,
 		  "Enable or disable rules. 'a' for avoid, 'l' for align, 'c' for cohesion (i.e. '+a-lc')", "(+|-)(a|l|c)" },
+		{ "start", 's', 0, G_OPTION_ARG_NONE, &start,
+		  "Start the simulation", NULL },
 		{ "predator", 'p', 0, G_OPTION_ARG_NONE, &predator,
 		  "Add a predator in the swarm", NULL },
 		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
@@ -126,7 +129,7 @@ int main(int argc, char **argv)
 	swarm_set_bg_color(swarm, get_bg_color(bg_color_name));
 	g_free(bg_color_name);
 
-	gtk_boids_run(swarm);
+	gtk_boids_run(swarm, start);
 
 	swarm_free(swarm);
 

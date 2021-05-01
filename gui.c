@@ -701,7 +701,7 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
 
-	button = gtk_button_new_with_label("Start");
+	button = gtk_button_new_with_label(gui->running ? "Stop" : "Start");
 	gtk_widget_set_size_request(GTK_WIDGET(button), 68, -1);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_start_clicked), gui);
@@ -843,15 +843,19 @@ static void gui_show(BoidsGui *gui)
 	gtk_widget_show_all(window);
 }
 
-int gtk_boids_run(Swarm *swarm)
+int gtk_boids_run(Swarm *swarm, gboolean start)
 {
 	BoidsGui *gui;
 
 	gui = g_malloc0(sizeof(*gui));
 	gui->swarm = swarm;
+	gui->running = start;
 
 	gtk_init(0, NULL);
 	gui_show(gui);
+
+	if (start)
+		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
 
 	gtk_main();
 
