@@ -602,47 +602,6 @@ gboolean swarm_get_predator_enable(Swarm *swarm)
 	return swarm->predator;
 }
 
-static int swarm_move_thread(Swarm *swarm)
-{
-	GTimer *timer = g_timer_new();
-	gulong elapsed;
-
-	while (swarm->move_th_running) {
-		g_timer_start(timer);
-		swarm_move(swarm);
-		g_timer_elapsed(timer, &elapsed);
-
-		swarm->animate_cb(swarm->animate_cb_userdata, elapsed);
-	}
-
-	return 0;
-}
-
-void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata)
-{
-	if (swarm->move_th_running)
-		return;
-
-	swarm->animate_cb = cb;
-	swarm->animate_cb_userdata = userdata;
-	swarm->move_th_running  = TRUE;
-	swarm->move_th = g_thread_new("move", (GThreadFunc)swarm_move_thread, swarm);
-}
-
-void swarm_thread_stop(Swarm *swarm)
-{
-	if (!swarm->move_th_running)
-		return;
-
-	swarm->move_th_running = FALSE;
-	g_thread_join(swarm->move_th);
-}
-
-gboolean swarm_thread_running(Swarm *swarm)
-{
-	return swarm->move_th_running;
-}
-
 void swarm_free(Swarm *swarm)
 {
 	g_array_free(swarm->boids, TRUE);

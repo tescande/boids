@@ -17,7 +17,7 @@ typedef struct {
 	cairo_surface_t *bg_surface;
 	cairo_t *cr;
 
-	GMutex lock;
+	gboolean running;
 
 	Swarm *swarm;
 
@@ -29,8 +29,6 @@ typedef struct {
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 {
-	g_mutex_lock(&gui->lock);
-
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
 	cairo_paint(cr);
 
@@ -89,8 +87,6 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 			cairo_stroke(cr);
 		}
 	}
-
-	g_mutex_unlock(&gui->lock);
 }
 
 static void draw_obstacles(BoidsGui *gui)
@@ -203,58 +199,6 @@ static void draw(BoidsGui *gui)
 	cairo_paint(gui->cr);
 }
 
-#define DELAY 20000
-
-static void animate_cb(BoidsGui *gui, gulong compute_time)
-{
-	GTimer *timer = g_timer_new();
-	gulong draw_time;
-	gulong total_time;
-	gint64 curr_time;
-
-	g_timer_start(timer);
-
-	g_mutex_lock(&gui->lock);
-	draw(gui);
-	g_mutex_unlock(&gui->lock);
-
-	g_timer_elapsed(timer, &draw_time);
-	total_time = compute_time + draw_time;
-
-	if (swarm_show_debug_controls(gui->swarm)) {
-		curr_time = g_get_monotonic_time();
-
-		if (curr_time - gui->update_label_time > G_USEC_PER_SEC ||
-		    total_time > gui->compute_time + gui->draw_time) {
-			gui->update_label_time = curr_time;
-			gui->compute_time = compute_time;
-			gui->draw_time = draw_time;
-		}
-	}
-
-	if (total_time < DELAY)
-		g_usleep(DELAY - total_time);
-}
-
-static gboolean queue_draw(BoidsGui *gui)
-{
-	if (swarm_show_debug_controls(gui->swarm)) {
-		gchar label[32];
-		gulong total_time = gui->compute_time + gui->draw_time;
-
-		g_snprintf(label, 32, "c: %2ldms d: %2ldms %ld fps",
-			   gui->compute_time / 1000,
-			   gui->draw_time / 1000,
-			   total_time ? 1000000 / total_time : 0);
-
-		gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
-	}
-
-	gtk_widget_queue_draw(gui->drawing_area);
-
-	return swarm_thread_running(gui->swarm);
-}
-
 static void draw_background(BoidsGui *gui)
 {
 	gdouble rgb[3];
@@ -345,7 +289,7 @@ static void draw_background(BoidsGui *gui)
 
 static void cairo_set_boids_draw_operator(BoidsGui *gui)
 {
-	if (swarm_thread_running(gui->swarm)) {
+	if (gui->running) {
 		gui->boids_cr_operator = CAIRO_OPERATOR_DEST_OUT;
 		gui->boids_cr_alpha = 0.5;
 	} else {
@@ -356,7 +300,7 @@ static void cairo_set_boids_draw_operator(BoidsGui *gui)
 
 static void update(BoidsGui *gui)
 {
-	if (!swarm_thread_running(gui->swarm)) {
+	if (!gui->running) {
 		draw(gui);
 		gtk_widget_queue_draw(gui->drawing_area);
 	}
@@ -368,8 +312,6 @@ static void cairo_init(BoidsGui *gui)
 	gint height;
 
 	swarm_get_sizes(gui->swarm, &width, &height);
-
-	g_mutex_lock(&gui->lock);
 
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
@@ -396,33 +338,81 @@ static void cairo_init(BoidsGui *gui)
 	draw_background(gui);
 
 	draw(gui);
+}
 
-	g_mutex_unlock(&gui->lock);
+#define DELAY 20000
+
+static gboolean gui_animate(BoidsGui *gui)
+{
+	static gint64 last_time = 0;
+	gint64 now;
+	gint64 compute_time;
+	gint64 draw_time;
+	gint64 curr_time;
+	gint64 total_time;
+
+	now = g_get_monotonic_time();
+	if (now - last_time < DELAY) {
+		g_usleep(100);
+		return TRUE;
+	}
+
+	last_time = now;
+
+	swarm_move(gui->swarm);
+	compute_time = g_get_monotonic_time() - now;
+
+	draw(gui);
+	draw_time = g_get_monotonic_time() - now - compute_time;
+
+	if (swarm_show_debug_controls(gui->swarm)) {
+		curr_time = g_get_monotonic_time();
+		total_time = compute_time + draw_time;
+
+		if (curr_time - gui->update_label_time > G_USEC_PER_SEC ||
+		    total_time > gui->compute_time + gui->draw_time) {
+			gchar label[32];
+
+			gui->update_label_time = curr_time;
+			gui->compute_time = compute_time;
+			gui->draw_time = draw_time;
+
+			g_snprintf(label, 32, "c: %2ldms d: %2ldms %ld fps",
+				   compute_time / 1000,
+				   draw_time / 1000,
+				   total_time ? 1000000 / total_time : 0);
+
+			gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
+		}
+	}
+
+	gtk_widget_queue_draw(gui->drawing_area);
+
+	return TRUE;
 }
 
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 {
-	if (swarm_thread_running(gui->swarm)) {
-		swarm_thread_stop(gui->swarm);
+	if (gui->running) {
+		gui->running = FALSE;
+		g_idle_remove_by_data(gui);
 		gtk_button_set_label(button, "Start");
 		cairo_set_boids_draw_operator(gui);
-		draw(gui);
-		return;
+		update(gui);
+	} else {
+		gui->running = TRUE;
+		gtk_button_set_label(button, "Stop");
+		cairo_set_boids_draw_operator(gui);
+		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
 	}
-
-	gtk_button_set_label(button, "Stop");
-	swarm_thread_start(gui->swarm, (SwarmAnimateFunc)animate_cb, gui);
-	cairo_set_boids_draw_operator(gui);
-	g_timeout_add(10, (GSourceFunc)queue_draw, gui);
 }
 
 static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 {
-	if (swarm_thread_running(gui->swarm))
+	if (gui->running)
 		return;
 
-	swarm_move(gui->swarm);
-	update(gui);
+	gui_animate(gui);
 }
 
 static void on_avoid_clicked(GtkToggleButton *button, BoidsGui *gui)
@@ -457,9 +447,7 @@ static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
 {
 	swarm_set_bg_color(gui->swarm, gtk_combo_box_get_active(combo));
 
-	g_mutex_lock(&gui->lock);
 	draw_background(gui);
-	g_mutex_unlock(&gui->lock);
 
 	update(gui);
 }
@@ -593,7 +581,7 @@ static void on_cohesion_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
 
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
-	swarm_thread_stop(gui->swarm);
+	g_idle_remove_by_data(gui);
 
 	gtk_main_quit();
 }
@@ -861,7 +849,6 @@ int gtk_boids_run(Swarm *swarm)
 
 	gui = g_malloc0(sizeof(*gui));
 	gui->swarm = swarm;
-	g_mutex_init(&gui->lock);
 
 	gtk_init(0, NULL);
 	gui_show(gui);

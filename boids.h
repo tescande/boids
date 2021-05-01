@@ -101,11 +101,6 @@ typedef struct _Swarm {
 	guint align_dist;
 	guint cohesion_dist;
 
-	GThread  *move_th;
-	gboolean move_th_running;
-	SwarmAnimateFunc animate_cb;
-	gpointer animate_cb_userdata;
-
 	Vector mouse_pos;
 	gboolean scary_mouse;
 	gboolean attractive_mouse;
@@ -191,10 +186,6 @@ gboolean swarm_get_predator_enable(Swarm *swarm);
 #define swarm_obstacle_get_type(swarm, n) (g_array_index((swarm)->obstacles, Obstacle, n).type)
 #define swarm_num_obstacles(swarm) ((swarm)->obstacles->len)
 Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type);
-
-void swarm_thread_start(Swarm *swarm, SwarmAnimateFunc cb, gpointer userdata);
-void swarm_thread_stop(Swarm *swarm);
-gboolean swarm_thread_running(Swarm *swarm);
 
 void swarm_move(Swarm *swarm);
 
