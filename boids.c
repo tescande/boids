@@ -33,6 +33,42 @@ static int get_bg_color(const gchar *color)
 	return res;
 }
 
+static void get_boid_rules(gchar *rules, gboolean *avoid, gboolean *align,
+			   gboolean *cohesion)
+{
+	gchar op = 0;
+	int i;
+
+	if (!rules)
+		return;
+
+	i = 0;
+	for (i = 0; rules[i]; i++) {
+		if (!op) {
+			op = rules[i];
+			continue;
+		}
+
+		switch (rules[i]) {
+		case '+':
+		case '-':
+			op = rules[i];
+			break;
+		case 'a':
+			*avoid = (op == '+') ? TRUE : FALSE;
+			break;
+		case 'l':
+			*align = (op == '+') ? TRUE : FALSE;
+			break;
+		case 'c':
+			*cohesion = (op == '+') ? TRUE : FALSE;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 int main(int argc, char **argv)
 {
 	Swarm *swarm;
@@ -41,12 +77,18 @@ int main(int argc, char **argv)
 	gboolean walls = FALSE;
 	gboolean debug = FALSE;
 	gboolean predator = FALSE;
+	gboolean rule_avoid = TRUE;
+	gboolean rule_align = TRUE;
+	gboolean rule_cohesion = TRUE;
+	gchar *rules = NULL;
 	gchar *bg_color_name = NULL;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry entries[] = {
 		{ "num-boids", 'n', 0, G_OPTION_ARG_INT, &num_boids,
 		  "Number of boids", "VAL" },
+		{ "rules", 'l', 0, G_OPTION_ARG_STRING, &rules,
+		  "Enable or disable rules. 'a' for avoid, 'l' for align, 'c' for cohesion (i.e. '+a-lc')", "(+|-)(a|l|c)" },
 		{ "predator", 'p', 0, G_OPTION_ARG_NONE, &predator,
 		  "Add a predator in the swarm", NULL },
 		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
@@ -70,14 +112,17 @@ int main(int argc, char **argv)
 	if (seed)
 		g_random_set_seed(seed);
 
+	get_boid_rules(rules, &rule_avoid, &rule_align, &rule_cohesion);
+	g_free(rules);
+
 	swarm = swarm_alloc();
 	swarm_set_debug_controls(swarm, debug);
 	swarm_set_num_boids(swarm, num_boids);
 	swarm_walls_set_enable(swarm, walls);
 	swarm_set_predator_enable(swarm, predator);
-	swarm_rule_set_active(swarm, RULE_AVOID, TRUE);
-	swarm_rule_set_active(swarm, RULE_ALIGN, TRUE);
-	swarm_rule_set_active(swarm, RULE_COHESION, TRUE);
+	swarm_rule_set_active(swarm, RULE_AVOID, rule_avoid);
+	swarm_rule_set_active(swarm, RULE_ALIGN, rule_align);
+	swarm_rule_set_active(swarm, RULE_COHESION, rule_cohesion);
 	swarm_set_bg_color(swarm, get_bg_color(bg_color_name));
 	g_free(bg_color_name);
 
