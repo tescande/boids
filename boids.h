@@ -77,7 +77,7 @@ typedef struct {
 
 typedef struct _Swarm Swarm;
 
-typedef void (*SwarmAnimateFunc)(Swarm *swarm, gulong time);
+typedef void (*SwarmAnimateFunc)(gpointer userdata, gulong time);
 
 typedef struct _Swarm {
 	GArray *boids;
