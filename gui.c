@@ -245,40 +245,6 @@ static void gui_update(BoidsGui *gui)
 	}
 }
 
-static void gui_init(BoidsGui *gui)
-{
-	gint width;
-	gint height;
-
-	swarm_get_sizes(gui->swarm, &width, &height);
-
-	cairo_destroy(gui->cr);
-	cairo_surface_destroy(gui->surface);
-
-	cairo_destroy(gui->boids_cr);
-	cairo_surface_destroy(gui->boids_surface);
-
-	cairo_surface_destroy(gui->bg_surface);
-
-	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-						  width, height);
-	gui->cr = cairo_create(gui->surface);
-
-	gui->boids_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-							width, height);
-
-	gui->boids_cr = cairo_create(gui->boids_surface);
-
-	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-						     width, height);
-
-	gui_set_boids_draw_operator(gui);
-
-	gui_draw_background(gui);
-
-	gui_draw(gui);
-}
-
 #define DELAY 20000
 
 static gboolean gui_animate(BoidsGui *gui)
@@ -328,6 +294,40 @@ static gboolean gui_animate(BoidsGui *gui)
 	gtk_widget_queue_draw(gui->drawing_area);
 
 	return TRUE;
+}
+
+static void gui_init(BoidsGui *gui)
+{
+	gint width;
+	gint height;
+
+	swarm_get_sizes(gui->swarm, &width, &height);
+
+	cairo_destroy(gui->cr);
+	cairo_surface_destroy(gui->surface);
+
+	cairo_destroy(gui->boids_cr);
+	cairo_surface_destroy(gui->boids_surface);
+
+	cairo_surface_destroy(gui->bg_surface);
+
+	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+						  width, height);
+	gui->cr = cairo_create(gui->surface);
+
+	gui->boids_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+							width, height);
+
+	gui->boids_cr = cairo_create(gui->boids_surface);
+
+	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+						     width, height);
+
+	gui_set_boids_draw_operator(gui);
+
+	gui_draw_background(gui);
+
+	gui_draw(gui);
 }
 
 static void gui_set_bg_color(BoidsGui *gui, gint bg_color)
