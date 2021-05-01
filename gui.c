@@ -28,68 +28,6 @@ typedef struct {
 	gint64 update_label_time;
 } BoidsGui;
 
-static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
-{
-	cairo_set_source_surface(cr, gui->surface, 0, 0);
-	cairo_paint(cr);
-
-	if (swarm_show_debug_vectors(gui->swarm)) {
-		int i;
-
-		for (i = 0; i < 10 && i < swarm_get_num_boids(gui->swarm); i++) {
-			Boid *b = swarm_get_boid(gui->swarm, i);
-			Vector v = b->pos;
-			Vector avoid, align, cohes, obst, veloc;
-
-			vector_mult2(&b->avoid, DEBUG_VECT_FACTOR, &avoid);
-			vector_mult2(&b->align, DEBUG_VECT_FACTOR, &align);
-			vector_mult2(&b->cohesion, DEBUG_VECT_FACTOR, &cohes);
-			vector_mult2(&b->obstacle, DEBUG_VECT_FACTOR, &obst);
-			vector_mult2(&b->velocity, DEBUG_VECT_FACTOR, &veloc);
-
-			//~ vector_print(&b->pos, "pos");
-			//~ vector_print(&avoid, "avoid");
-			//~ vector_print(&align, "align");
-			//~ vector_print(&cohes, "cohesion");
-			//~ vector_print(&obst, "obstacle");
-			//~ vector_print(&veloc, "velocity");
-
-			cairo_set_line_width(cr, 2);
-			cairo_move_to(cr, v.x, v.y);
-
-			cairo_rel_line_to(cr, avoid.x, avoid.y);
-			cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
-			cairo_stroke(cr);
-
-			vector_add(&v, &avoid);
-			cairo_move_to(cr, v.x, v.y);
-
-			cairo_rel_line_to(cr, align.x, align.y);
-			cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
-			cairo_stroke(cr);
-
-			vector_add(&v, &align);
-			cairo_move_to(cr, v.x, v.y);
-
-			cairo_rel_line_to(cr, cohes.x, cohes.y);
-			cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 1.0);
-			cairo_stroke(cr);
-
-			vector_add(&v, &cohes);
-			cairo_move_to(cr, v.x, v.y);
-
-			cairo_set_source_rgba(cr, 1.0, 0.0, 1.0, 1.0);
-			cairo_rel_line_to(cr, obst.x, obst.y);
-			cairo_stroke(cr);
-
-			cairo_move_to(cr, b->pos.x, b->pos.y);
-			cairo_rel_line_to(cr, veloc.x, veloc.y);
-			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-			cairo_stroke(cr);
-		}
-	}
-}
-
 static void draw_obstacles(BoidsGui *gui)
 {
 	int i;
@@ -399,6 +337,68 @@ static void gui_set_bg_color(BoidsGui *gui, gint bg_color)
 					      BG_COLOR_RND_MAX + 1);
 
 	gui->bg_color = bg_color;
+}
+
+static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
+{
+	cairo_set_source_surface(cr, gui->surface, 0, 0);
+	cairo_paint(cr);
+
+	if (swarm_show_debug_vectors(gui->swarm)) {
+		int i;
+
+		for (i = 0; i < 10 && i < swarm_get_num_boids(gui->swarm); i++) {
+			Boid *b = swarm_get_boid(gui->swarm, i);
+			Vector v = b->pos;
+			Vector avoid, align, cohes, obst, veloc;
+
+			vector_mult2(&b->avoid, DEBUG_VECT_FACTOR, &avoid);
+			vector_mult2(&b->align, DEBUG_VECT_FACTOR, &align);
+			vector_mult2(&b->cohesion, DEBUG_VECT_FACTOR, &cohes);
+			vector_mult2(&b->obstacle, DEBUG_VECT_FACTOR, &obst);
+			vector_mult2(&b->velocity, DEBUG_VECT_FACTOR, &veloc);
+
+			//~ vector_print(&b->pos, "pos");
+			//~ vector_print(&avoid, "avoid");
+			//~ vector_print(&align, "align");
+			//~ vector_print(&cohes, "cohesion");
+			//~ vector_print(&obst, "obstacle");
+			//~ vector_print(&veloc, "velocity");
+
+			cairo_set_line_width(cr, 2);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, avoid.x, avoid.y);
+			cairo_set_source_rgba(cr, 1.0, 0.0, 0.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &avoid);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, align.x, align.y);
+			cairo_set_source_rgba(cr, 0.0, 1.0, 0.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &align);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_rel_line_to(cr, cohes.x, cohes.y);
+			cairo_set_source_rgba(cr, 0.0, 0.0, 1.0, 1.0);
+			cairo_stroke(cr);
+
+			vector_add(&v, &cohes);
+			cairo_move_to(cr, v.x, v.y);
+
+			cairo_set_source_rgba(cr, 1.0, 0.0, 1.0, 1.0);
+			cairo_rel_line_to(cr, obst.x, obst.y);
+			cairo_stroke(cr);
+
+			cairo_move_to(cr, b->pos.x, b->pos.y);
+			cairo_rel_line_to(cr, veloc.x, veloc.y);
+			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
+			cairo_stroke(cr);
+		}
+	}
 }
 
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
