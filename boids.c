@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 		  "Number of boids", "VAL" },
 		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
 		  "Add walls to the field", NULL },
-		{ "rand-seed", 's', 0, G_OPTION_ARG_INT, &seed,
+		{ "rand-seed", 'r', 0, G_OPTION_ARG_INT, &seed,
 		  "Random seed value", "VAL" },
 		{ "bg-color", 'b', 0, G_OPTION_ARG_STRING, &bg_color_name,
 		  "Background color", "red|green|blue" },
