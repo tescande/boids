@@ -536,7 +536,7 @@ void swarm_set_rule_dist(Swarm *swarm, SwarmRule rule, guint dist)
 		else if (d > ALIGN_DIST_MAX)
 			d = ALIGN_DIST_MAX;
 
-		swarm->align_dist = dist;
+		swarm->align_dist = d;
 		break;
 	case RULE_COHESION:
 		if (d < COHESION_DIST_MIN)
