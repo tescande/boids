@@ -742,6 +742,8 @@ static void gui_show(BoidsGui *gui)
 	check = gtk_check_button_new_with_label("Walls");
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
 				     swarm_walls_get_enable(gui->swarm));
+	if (swarm_get_predator_enable(gui->swarm))
+		gtk_widget_set_sensitive(check, FALSE);
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_walls_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
@@ -843,6 +845,8 @@ static void gui_show(BoidsGui *gui)
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
 
 	check = gtk_check_button_new_with_label("Predator");
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(check),
+				     swarm_get_predator_enable(gui->swarm));
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_predator_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);

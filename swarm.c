@@ -580,6 +580,8 @@ void swarm_set_predator_enable(Swarm *swarm, gboolean enable)
 	else
 		swarm_remove_obstacle_by_type(swarm, OBSTACLE_TYPE_PREDATOR);
 
+	/* Walls removed by swarm_add_obstacle() */
+	swarm->walls = FALSE;
 	swarm->predator = enable;
 }
 
