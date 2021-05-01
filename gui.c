@@ -23,6 +23,7 @@ typedef struct {
 
 	GtkWidget *timing_label;
 	gulong compute_time;
+	gulong draw_time;
 	gint64 update_label_time;
 } BoidsGui;
 
@@ -204,11 +205,11 @@ static void draw(BoidsGui *gui)
 
 #define DELAY 20000
 
-static void animate_cb(BoidsGui *gui, gulong time)
+static void animate_cb(BoidsGui *gui, gulong compute_time)
 {
 	GTimer *timer = g_timer_new();
-	gulong elapsed;
-	gulong compute_time;
+	gulong draw_time;
+	gulong total_time;
 	gint64 curr_time;
 
 	g_timer_start(timer);
@@ -217,29 +218,35 @@ static void animate_cb(BoidsGui *gui, gulong time)
 	draw(gui);
 	g_mutex_unlock(&gui->lock);
 
-	g_timer_elapsed(timer, &elapsed);
-	compute_time = time + elapsed;
+	g_timer_elapsed(timer, &draw_time);
+	total_time = compute_time + draw_time;
 
 	if (swarm_show_debug_controls(gui->swarm)) {
 		curr_time = g_get_monotonic_time();
 
 		if (curr_time - gui->update_label_time > G_USEC_PER_SEC ||
-		    compute_time > gui->compute_time) {
+		    total_time > gui->compute_time + gui->draw_time) {
 			gui->update_label_time = curr_time;
 			gui->compute_time = compute_time;
+			gui->draw_time = draw_time;
 		}
 	}
 
-	if (compute_time < DELAY)
-		g_usleep(DELAY - compute_time);
+	if (total_time < DELAY)
+		g_usleep(DELAY - total_time);
 }
 
 static gboolean queue_draw(BoidsGui *gui)
 {
 	if (swarm_show_debug_controls(gui->swarm)) {
 		gchar label[32];
-		g_snprintf(label, 32, "%2ldms, %ld fps", gui->compute_time / 1000,
-			    gui->compute_time ? 1000000 / gui->compute_time : 0);
+		gulong total_time = gui->compute_time + gui->draw_time;
+
+		g_snprintf(label, 32, "c: %2ldms d: %2ldms %ld fps",
+			   gui->compute_time / 1000,
+			   gui->draw_time / 1000,
+			   total_time ? 1000000 / total_time : 0);
+
 		gtk_label_set_text(GTK_LABEL(gui->timing_label), label);
 	}
 
