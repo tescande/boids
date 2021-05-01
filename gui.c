@@ -237,6 +237,15 @@ static void gui_set_boids_draw_operator(BoidsGui *gui)
 	}
 }
 
+static void gui_set_bg_color(BoidsGui *gui, gint bg_color)
+{
+	if (bg_color < BG_COLOR_MIN || bg_color > BG_COLOR_MAX)
+		bg_color = g_random_int_range(BG_COLOR_RND_MIN,
+					      BG_COLOR_RND_MAX + 1);
+
+	gui->bg_color = bg_color;
+}
+
 static void gui_update(BoidsGui *gui)
 {
 	if (!gui->running) {
@@ -328,15 +337,6 @@ static void gui_init(BoidsGui *gui)
 	gui_draw_background(gui);
 
 	gui_draw(gui);
-}
-
-static void gui_set_bg_color(BoidsGui *gui, gint bg_color)
-{
-	if (bg_color < BG_COLOR_MIN || bg_color > BG_COLOR_MAX)
-		bg_color = g_random_int_range(BG_COLOR_RND_MIN,
-					      BG_COLOR_RND_MAX + 1);
-
-	gui->bg_color = bg_color;
 }
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
