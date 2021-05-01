@@ -40,12 +40,15 @@ int main(int argc, char **argv)
 	int seed = 0;
 	gboolean walls = FALSE;
 	gboolean debug = FALSE;
+	gboolean predator = FALSE;
 	gchar *bg_color_name = NULL;
 	GError *error = NULL;
 	GOptionContext *context;
 	GOptionEntry entries[] = {
 		{ "num-boids", 'n', 0, G_OPTION_ARG_INT, &num_boids,
 		  "Number of boids", "VAL" },
+		{ "predator", 'p', 0, G_OPTION_ARG_NONE, &predator,
+		  "Add a predator in the swarm", NULL },
 		{ "walls", 'w', 0, G_OPTION_ARG_NONE, &walls,
 		  "Add walls to the field", NULL },
 		{ "rand-seed", 'r', 0, G_OPTION_ARG_INT, &seed,
@@ -71,6 +74,7 @@ int main(int argc, char **argv)
 	swarm_set_debug_controls(swarm, debug);
 	swarm_set_num_boids(swarm, num_boids);
 	swarm_walls_set_enable(swarm, walls);
+	swarm_set_predator_enable(swarm, predator);
 	swarm_rule_set_active(swarm, RULE_AVOID, TRUE);
 	swarm_rule_set_active(swarm, RULE_ALIGN, TRUE);
 	swarm_rule_set_active(swarm, RULE_COHESION, TRUE);

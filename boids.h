@@ -183,7 +183,8 @@ gboolean swarm_remove_obstacle(Swarm *swarm, gdouble x, gdouble y);
 void swarm_set_bg_color(Swarm *swarm, int color);
 int swarm_get_bg_color(Swarm *swarm);
 
-void swarm_predator_enable(Swarm *swarm, gboolean enable);
+void swarm_set_predator_enable(Swarm *swarm, gboolean enable);
+gboolean swarm_get_predator_enable(Swarm *swarm);
 
 #define swarm_obstacle_get(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n)))
 #define swarm_obstacle_get_pos(swarm, n) (&(g_array_index((swarm)->obstacles, Obstacle, n).pos))

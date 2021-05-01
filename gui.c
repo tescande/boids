@@ -571,7 +571,7 @@ static void on_predator_clicked(GtkToggleButton *button, BoidsGui *gui)
 		gtk_toggle_button_set_active(gui->walls_check, FALSE);
 	gtk_widget_set_sensitive(GTK_WIDGET(gui->walls_check), !enable);
 
-	swarm_predator_enable(gui->swarm, enable);
+	swarm_set_predator_enable(gui->swarm, enable);
 
 	if (!swarm_thread_running(gui->swarm)) {
 		draw(gui);

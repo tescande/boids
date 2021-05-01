@@ -586,7 +586,7 @@ int swarm_get_bg_color(Swarm *swarm)
 	return swarm->bg_color;
 }
 
-void swarm_predator_enable(Swarm *swarm, gboolean enable)
+void swarm_set_predator_enable(Swarm *swarm, gboolean enable)
 {
 	if (enable)
 		swarm_add_obstacle(swarm, swarm->width >> 1, swarm->height >> 1,
@@ -595,6 +595,11 @@ void swarm_predator_enable(Swarm *swarm, gboolean enable)
 		swarm_remove_obstacle_by_type(swarm, OBSTACLE_TYPE_PREDATOR);
 
 	swarm->predator = enable;
+}
+
+gboolean swarm_get_predator_enable(Swarm *swarm)
+{
+	return swarm->predator;
 }
 
 static int swarm_move_thread(Swarm *swarm)
