@@ -354,6 +354,14 @@ static void cairo_set_boids_draw_operator(BoidsGui *gui)
 	}
 }
 
+static void update(BoidsGui *gui)
+{
+	if (!swarm_thread_running(gui->swarm)) {
+		draw(gui);
+		gtk_widget_queue_draw(gui->drawing_area);
+	}
+}
+
 static void cairo_init(BoidsGui *gui)
 {
 	gint width;
@@ -414,8 +422,7 @@ static void on_step_clicked(GtkButton *button, BoidsGui *gui)
 		return;
 
 	swarm_move(gui->swarm);
-	draw(gui);
-	gtk_widget_queue_draw(gui->drawing_area);
+	update(gui);
 }
 
 static void on_avoid_clicked(GtkToggleButton *button, BoidsGui *gui)
@@ -443,10 +450,7 @@ static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
 	swarm_walls_set_enable(gui->swarm, gtk_toggle_button_get_active(button));
 
-	if (!swarm_thread_running(gui->swarm)) {
-		draw(gui);
-		gtk_widget_queue_draw(gui->drawing_area);
-	}
+	update(gui);
 }
 
 static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
@@ -457,20 +461,14 @@ static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
 	draw_background(gui);
 	g_mutex_unlock(&gui->lock);
 
-	if (!swarm_thread_running(gui->swarm)) {
-		draw(gui);
-		gtk_widget_queue_draw(gui->drawing_area);
-	}
+	update(gui);
 }
 
 static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 
-	if (!swarm_thread_running(gui->swarm)) {
-		draw(gui);
-		gtk_widget_queue_draw(gui->drawing_area);
-	}
+	update(gui);
 }
 
 static void on_dead_angle_clicked(GtkToggleButton *button, BoidsGui *gui)
@@ -515,7 +513,6 @@ static void on_mouse_mode_attractive_clicked(GtkToggleButton *button, BoidsGui *
 
 static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 {
-	gboolean redraw = TRUE;
 	gboolean button1 = FALSE;
 	gboolean control = FALSE;
 	gdouble x, y;
@@ -551,14 +548,11 @@ static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 		return FALSE;
 
 	if (control)
-		redraw = swarm_remove_obstacle(gui->swarm, x, y);
+		swarm_remove_obstacle(gui->swarm, x, y);
 	else
 		swarm_add_obstacle(gui->swarm, x, y, OBSTACLE_TYPE_IN_FIELD);
 
-	if (!swarm_thread_running(gui->swarm) && redraw) {
-		draw(gui);
-		gtk_widget_queue_draw(gui->drawing_area);
-	}
+	update(gui);
 
 	return TRUE;
 }
@@ -573,10 +567,7 @@ static void on_predator_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 	swarm_set_predator_enable(gui->swarm, enable);
 
-	if (!swarm_thread_running(gui->swarm)) {
-		draw(gui);
-		gtk_widget_queue_draw(gui->drawing_area);
-	}
+	update(gui);
 }
 
 
