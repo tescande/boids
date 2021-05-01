@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 	bg_color = get_bg_color(bg_color_name);
 	g_free(bg_color_name);
 
-	gtk_boids_run(swarm, bg_color, start);
+	gui_run(swarm, bg_color, start);
 
 	swarm_free(swarm);
 

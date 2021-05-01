@@ -184,6 +184,6 @@ Obstacle *swarm_get_obstacle_by_type(Swarm *swarm, guint type);
 
 void swarm_move(Swarm *swarm);
 
-int gtk_boids_run(Swarm *swarm, gint bg_color, gboolean start);
+int gui_run(Swarm *swarm, gint bg_color, gboolean start);
 
 #endif /* __BOIDS_H__ */

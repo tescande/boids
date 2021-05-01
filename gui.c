@@ -28,7 +28,7 @@ typedef struct {
 	gint64 update_label_time;
 } BoidsGui;
 
-static void draw_obstacles(BoidsGui *gui)
+static void gui_draw_obstacles(BoidsGui *gui)
 {
 	int i;
 
@@ -46,7 +46,7 @@ static void draw_obstacles(BoidsGui *gui)
 	}
 }
 
-static void draw_boid(cairo_t *cr, Boid *b)
+static void gui_draw_boid(cairo_t *cr, Boid *b)
 {
 	Vector top;
 	Vector bottom;
@@ -66,7 +66,7 @@ static void draw_boid(cairo_t *cr, Boid *b)
 	cairo_stroke(cr);
 }
 
-static void draw_predator(BoidsGui *gui)
+static void gui_draw_predator(BoidsGui *gui)
 {
 	gdouble predator_rgb[][3] = {
 		[BG_COLOR_WHITE]    = { 0.6, 0.6, 0.6 },
@@ -100,7 +100,7 @@ static void draw_predator(BoidsGui *gui)
 	cairo_stroke(gui->boids_cr);
 }
 
-static void draw_background(BoidsGui *gui)
+static void gui_draw_background(BoidsGui *gui)
 {
 	gdouble rgb[3];
 	int full_color;
@@ -188,14 +188,14 @@ static void draw_background(BoidsGui *gui)
 	cairo_destroy(bg_cr);
 }
 
-static void draw(BoidsGui *gui)
+static void gui_draw(BoidsGui *gui)
 {
 	int i;
 
 	cairo_set_source_surface(gui->cr, gui->bg_surface, 0, 0);
 	cairo_paint(gui->cr);
 
-	draw_obstacles(gui);
+	gui_draw_obstacles(gui);
 
 	/*
 	 * Draw the boid trail effect.
@@ -217,16 +217,16 @@ static void draw(BoidsGui *gui)
 
 	for (i = 0; i < swarm_get_num_boids(gui->swarm); i++) {
 		Boid *b = swarm_get_boid(gui->swarm, i);
-		draw_boid(gui->boids_cr, b);
+		gui_draw_boid(gui->boids_cr, b);
 	}
 
-	draw_predator(gui);
+	gui_draw_predator(gui);
 
 	cairo_set_source_surface(gui->cr, gui->boids_surface, 0, 0);
 	cairo_paint(gui->cr);
 }
 
-static void cairo_set_boids_draw_operator(BoidsGui *gui)
+static void gui_set_boids_draw_operator(BoidsGui *gui)
 {
 	if (gui->running) {
 		gui->boids_cr_operator = CAIRO_OPERATOR_DEST_OUT;
@@ -237,15 +237,15 @@ static void cairo_set_boids_draw_operator(BoidsGui *gui)
 	}
 }
 
-static void update(BoidsGui *gui)
+static void gui_update(BoidsGui *gui)
 {
 	if (!gui->running) {
-		draw(gui);
+		gui_draw(gui);
 		gtk_widget_queue_draw(gui->drawing_area);
 	}
 }
 
-static void cairo_init(BoidsGui *gui)
+static void gui_init(BoidsGui *gui)
 {
 	gint width;
 	gint height;
@@ -272,11 +272,11 @@ static void cairo_init(BoidsGui *gui)
 	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 						     width, height);
 
-	cairo_set_boids_draw_operator(gui);
+	gui_set_boids_draw_operator(gui);
 
-	draw_background(gui);
+	gui_draw_background(gui);
 
-	draw(gui);
+	gui_draw(gui);
 }
 
 #define DELAY 20000
@@ -301,7 +301,7 @@ static gboolean gui_animate(BoidsGui *gui)
 	swarm_move(gui->swarm);
 	compute_time = g_get_monotonic_time() - now;
 
-	draw(gui);
+	gui_draw(gui);
 	draw_time = g_get_monotonic_time() - now - compute_time;
 
 	if (swarm_show_debug_controls(gui->swarm)) {
@@ -407,12 +407,12 @@ static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 		gui->running = FALSE;
 		g_idle_remove_by_data(gui);
 		gtk_button_set_label(button, "Start");
-		cairo_set_boids_draw_operator(gui);
-		update(gui);
+		gui_set_boids_draw_operator(gui);
+		gui_update(gui);
 	} else {
 		gui->running = TRUE;
 		gtk_button_set_label(button, "Stop");
-		cairo_set_boids_draw_operator(gui);
+		gui_set_boids_draw_operator(gui);
 		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
 	}
 }
@@ -450,23 +450,23 @@ static void on_walls_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
 	swarm_walls_set_enable(gui->swarm, gtk_toggle_button_get_active(button));
 
-	update(gui);
+	gui_update(gui);
 }
 
 static void on_bg_color_changed(GtkComboBox *combo, BoidsGui *gui)
 {
 	gui_set_bg_color(gui, gtk_combo_box_get_active(combo));
 
-	draw_background(gui);
+	gui_draw_background(gui);
 
-	update(gui);
+	gui_update(gui);
 }
 
 static void on_num_boids_changed(GtkSpinButton *spin, BoidsGui *gui)
 {
 	swarm_set_num_boids(gui->swarm, gtk_spin_button_get_value_as_int(spin));
 
-	update(gui);
+	gui_update(gui);
 }
 
 static void on_dead_angle_clicked(GtkToggleButton *button, BoidsGui *gui)
@@ -550,7 +550,7 @@ static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 	else
 		swarm_add_obstacle(gui->swarm, x, y, OBSTACLE_TYPE_IN_FIELD);
 
-	update(gui);
+	gui_update(gui);
 
 	return TRUE;
 }
@@ -565,9 +565,8 @@ static void on_predator_clicked(GtkToggleButton *button, BoidsGui *gui)
 
 	swarm_set_predator_enable(gui->swarm, enable);
 
-	update(gui);
+	gui_update(gui);
 }
-
 
 static void on_debug_vectors_clicked(GtkToggleButton *button, BoidsGui *gui)
 {
@@ -600,7 +599,7 @@ static gboolean on_configure_event(GtkWidget *widget, GdkEventConfigure *event,
 				   BoidsGui *gui)
 {
 	swarm_set_sizes(gui->swarm, event->width, event->height);
-	cairo_init(gui);
+	gui_init(gui);
 
 	return FALSE;
 }
@@ -857,7 +856,7 @@ static void gui_show(BoidsGui *gui)
 	gtk_widget_show_all(window);
 }
 
-int gtk_boids_run(Swarm *swarm, int bg_color, gboolean start)
+int gui_run(Swarm *swarm, int bg_color, gboolean start)
 {
 	BoidsGui *gui;
 
