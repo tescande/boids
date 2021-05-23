@@ -911,6 +911,9 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 		gui_show_debug_controls(gui, vbox);
 
 	gtk_widget_show_all(window);
+
+	if (gui->running)
+		gui_simulation_start(gui);
 }
 
 int gui_run(Swarm *swarm, int bg_color, gboolean start)
@@ -924,9 +927,6 @@ int gui_run(Swarm *swarm, int bg_color, gboolean start)
 
 	gui->app = gtk_application_new("org.escande.boids", G_APPLICATION_NON_UNIQUE);
 	g_signal_connect(gui->app, "activate", G_CALLBACK(gui_activate), gui);
-
-	if (start)
-		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
 
 	g_application_run(G_APPLICATION(gui->app), 0, NULL);
 
