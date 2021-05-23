@@ -7,6 +7,7 @@
 #define DEBUG_VECT_FACTOR 20
 
 typedef struct {
+	GtkApplication *app;
 	GtkWidget *window;
 	GtkWidget *controls_vbox;
 	GtkWidget *drawing_area;
@@ -604,8 +605,6 @@ static void on_cohesion_dist_changed(GtkSpinButton *spin, BoidsGui *gui)
 static void on_destroy(GtkWindow *win, BoidsGui *gui)
 {
 	g_idle_remove_by_data(gui);
-
-	gtk_main_quit();
 }
 
 static gboolean on_configure_event(GtkWidget *widget, GdkEventConfigure *event,
@@ -695,7 +694,7 @@ static void gui_show_debug_controls(BoidsGui *gui, GtkWidget *vbox)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 5);
 }
 
-static void gui_show(BoidsGui *gui)
+static void gui_activate(GtkApplication* app, BoidsGui *gui)
 {
 	GtkWidget *window;
 	GtkWidget *main_vbox;
@@ -713,7 +712,7 @@ static void gui_show(BoidsGui *gui)
 	gint width;
 	gint height;
 
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), "Boids");
 	g_signal_connect(G_OBJECT(window), "destroy",
 			 G_CALLBACK(on_destroy), gui);
@@ -913,13 +912,13 @@ int gui_run(Swarm *swarm, int bg_color, gboolean start)
 	gui->running = start;
 	gui_set_bg_color(gui, bg_color);
 
-	gtk_init(0, NULL);
-	gui_show(gui);
+	gui->app = gtk_application_new("org.escande.boids", G_APPLICATION_NON_UNIQUE);
+	g_signal_connect(gui->app, "activate", G_CALLBACK(gui_activate), gui);
 
 	if (start)
 		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
 
-	gtk_main();
+	g_application_run(G_APPLICATION(gui->app), 0, NULL);
 
 	if (gui->timing_label)
 		g_object_unref(gui->timing_label);
@@ -930,6 +929,8 @@ int gui_run(Swarm *swarm, int bg_color, gboolean start)
 	cairo_destroy(gui->cr);
 	cairo_surface_destroy(gui->surface);
 	cairo_surface_destroy(gui->bg_surface);
+
+	g_object_unref(gui->app);
 
 	g_free(gui);
 
