@@ -7,6 +7,8 @@
 #define DEBUG_VECT_FACTOR 20
 
 typedef struct {
+	GtkWidget *window;
+	GtkWidget *controls_vbox;
 	GtkWidget *drawing_area;
 	GtkToggleButton *walls_check;
 	cairo_surface_t *surface;
@@ -339,6 +341,17 @@ static void gui_init(BoidsGui *gui)
 	gui_draw(gui);
 }
 
+static void gui_set_fullscreen(BoidsGui *gui, gboolean fullscreen)
+{
+	if (fullscreen) {
+		gtk_widget_hide(gui->controls_vbox);
+		gtk_window_fullscreen(GTK_WINDOW(gui->window));
+	} else {
+		gtk_window_unfullscreen(GTK_WINDOW(gui->window));
+		gtk_widget_show(gui->controls_vbox);
+	}
+}
+
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 {
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
@@ -604,6 +617,32 @@ static gboolean on_configure_event(GtkWidget *widget, GdkEventConfigure *event,
 	return FALSE;
 }
 
+static gboolean on_keypress(GtkWidget *widget, GdkEventKey *event,
+			    BoidsGui *gui)
+{
+	GdkWindowState state;
+
+	if (event->type != GDK_KEY_PRESS)
+		return FALSE;
+
+	state = gdk_window_get_state(event->window);
+
+	switch (event->keyval) {
+	case GDK_KEY_F11:
+		break;
+	case GDK_KEY_Escape:
+		if (!(state & GDK_WINDOW_STATE_FULLSCREEN))
+			return FALSE;
+		break;
+	default:
+		return FALSE;
+	}
+
+	gui_set_fullscreen(gui, !(state & GDK_WINDOW_STATE_FULLSCREEN));
+
+	return TRUE;
+}
+
 static void gui_show_debug_controls(BoidsGui *gui, GtkWidget *vbox)
 {
 	GtkWidget *hbox;
@@ -659,6 +698,7 @@ static void gui_show_debug_controls(BoidsGui *gui, GtkWidget *vbox)
 static void gui_show(BoidsGui *gui)
 {
 	GtkWidget *window;
+	GtkWidget *main_vbox;
 	GtkWidget *vbox;
 	GtkWidget *hbox;
 	GtkWidget *drawing_area;
@@ -677,17 +717,20 @@ static void gui_show(BoidsGui *gui)
 	gtk_window_set_title(GTK_WINDOW(window), "Boids");
 	g_signal_connect(G_OBJECT(window), "destroy",
 			 G_CALLBACK(on_destroy), gui);
+	g_signal_connect(G_OBJECT(window), "key_press_event",
+			 G_CALLBACK(on_keypress), gui);
+	gui->window = window;
 
-	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-	gtk_container_set_border_width(GTK_CONTAINER(vbox), 5);
-	gtk_box_set_spacing(GTK_BOX(vbox), 5);
-	gtk_container_add(GTK_CONTAINER(window), vbox);
+	main_vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(main_vbox), 5);
+	gtk_box_set_spacing(GTK_BOX(main_vbox), 5);
+	gtk_container_add(GTK_CONTAINER(window), main_vbox);
 
 	drawing_area = gtk_drawing_area_new();
 	gui->drawing_area = g_object_ref(drawing_area);
 	swarm_get_sizes(gui->swarm, &width, &height);
 	gtk_widget_set_size_request(drawing_area, width, height);
-	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(main_vbox), drawing_area, TRUE, TRUE, 0);
 	g_signal_connect(G_OBJECT(drawing_area), "draw",
 			 G_CALLBACK(on_draw), gui);
 	gtk_widget_add_events(drawing_area, GDK_STRUCTURE_MASK |
@@ -705,6 +748,11 @@ static void gui_show(BoidsGui *gui)
 			 G_CALLBACK(on_mouse_event), gui);
 	g_signal_connect(G_OBJECT(drawing_area), "leave-notify-event",
 			 G_CALLBACK(on_mouse_event), gui);
+
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+	gtk_container_set_border_width(GTK_CONTAINER(main_vbox), 5);
+	gtk_container_add(GTK_CONTAINER(main_vbox), vbox);
+	gui->controls_vbox = vbox;
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
