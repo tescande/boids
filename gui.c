@@ -353,6 +353,21 @@ static void gui_set_fullscreen(BoidsGui *gui, gboolean fullscreen)
 	}
 }
 
+static void gui_simulation_start(BoidsGui *gui)
+{
+	gui->running = TRUE;
+	gui_set_boids_draw_operator(gui);
+	g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
+}
+
+static void gui_simulation_stop(BoidsGui *gui)
+{
+	gui->running = FALSE;
+	g_idle_remove_by_data(gui);
+	gui_set_boids_draw_operator(gui);
+	gui_update(gui);
+}
+
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 {
 	cairo_set_source_surface(cr, gui->surface, 0, 0);
@@ -418,16 +433,11 @@ static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
 static void on_start_clicked(GtkButton *button, BoidsGui *gui)
 {
 	if (gui->running) {
-		gui->running = FALSE;
-		g_idle_remove_by_data(gui);
 		gtk_button_set_label(button, "Start");
-		gui_set_boids_draw_operator(gui);
-		gui_update(gui);
+		gui_simulation_stop(gui);
 	} else {
-		gui->running = TRUE;
 		gtk_button_set_label(button, "Stop");
-		gui_set_boids_draw_operator(gui);
-		g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
+		gui_simulation_start(gui);
 	}
 }
 
