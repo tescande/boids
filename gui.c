@@ -20,6 +20,7 @@ typedef struct {
 	cairo_surface_t *bg_surface;
 	cairo_t *cr;
 	gint bg_color;
+	guint inhibit_cookie;
 
 	gboolean running;
 
@@ -358,6 +359,9 @@ static void gui_simulation_start(BoidsGui *gui)
 	gui->running = TRUE;
 	gui_set_boids_draw_operator(gui);
 	g_idle_add(G_SOURCE_FUNC(gui_animate), gui);
+
+	gui->inhibit_cookie = gtk_application_inhibit(gui->app, NULL,
+					 GTK_APPLICATION_INHIBIT_IDLE, "boids");
 }
 
 static void gui_simulation_stop(BoidsGui *gui)
@@ -366,6 +370,11 @@ static void gui_simulation_stop(BoidsGui *gui)
 	g_idle_remove_by_data(gui);
 	gui_set_boids_draw_operator(gui);
 	gui_update(gui);
+
+	if (gui->inhibit_cookie) {
+		gtk_application_uninhibit(gui->app, gui->inhibit_cookie);
+		gui->inhibit_cookie = 0;
+	}
 }
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
