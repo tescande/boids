@@ -324,7 +324,7 @@ static void gui_init(BoidsGui *gui)
 
 	cairo_surface_destroy(gui->bg_surface);
 
-	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+	gui->surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
 						  width, height);
 	gui->cr = cairo_create(gui->surface);
 
@@ -333,7 +333,7 @@ static void gui_init(BoidsGui *gui)
 
 	gui->boids_cr = cairo_create(gui->boids_surface);
 
-	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+	gui->bg_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
 						     width, height);
 
 	gui_set_boids_draw_operator(gui);
