@@ -11,6 +11,15 @@ typedef struct {
 	GtkWidget *window;
 	GtkWidget *controls_vbox;
 	GtkWidget *drawing_area;
+	GtkWidget *start_button;
+	GtkWidget *step_button;
+	GtkWidget *avoid_check;
+	GtkWidget *align_check;
+	GtkWidget *cohesion_check;
+	GtkWidget *fov_check;
+	GtkWidget *predator_check;
+	GtkWidget *speed_spin;
+	GtkWidget *num_boids_spin;
 	GtkToggleButton *walls_check;
 	cairo_surface_t *surface;
 	cairo_surface_t *boids_surface;
@@ -653,6 +662,40 @@ static gboolean on_keypress(GtkWidget *widget, GdkEventKey *event,
 			return FALSE;
 		gui_set_fullscreen(gui, !is_fullscreen);
 		break;
+	case GDK_KEY_s:
+	case GDK_KEY_S:
+		g_signal_emit_by_name(G_OBJECT(gui->start_button), "clicked");
+		return TRUE;
+	case GDK_KEY_a:
+	case GDK_KEY_A:
+		g_signal_emit_by_name(G_OBJECT(gui->avoid_check), "clicked");
+		return TRUE;
+	case GDK_KEY_l:
+	case GDK_KEY_L:
+		g_signal_emit_by_name(G_OBJECT(gui->align_check), "clicked");
+		return TRUE;
+	case GDK_KEY_c:
+	case GDK_KEY_C:
+		g_signal_emit_by_name(G_OBJECT(gui->cohesion_check), "clicked");
+		return TRUE;
+	case GDK_KEY_p:
+	case GDK_KEY_P:
+		g_signal_emit_by_name(G_OBJECT(gui->predator_check), "clicked");
+		return TRUE;
+	case GDK_KEY_Up:
+		g_signal_emit_by_name(G_OBJECT(gui->speed_spin), "change-value", GTK_SCROLL_STEP_UP);
+		return TRUE;
+	case GDK_KEY_Down:
+		g_signal_emit_by_name(G_OBJECT(gui->speed_spin), "change-value", GTK_SCROLL_STEP_DOWN);
+		return TRUE;
+	case GDK_KEY_plus:
+	case GDK_KEY_KP_Add:
+		g_signal_emit_by_name(G_OBJECT(gui->num_boids_spin), "change-value", GTK_SCROLL_STEP_UP);
+		return TRUE;
+	case GDK_KEY_minus:
+	case GDK_KEY_KP_Subtract:
+		g_signal_emit_by_name(G_OBJECT(gui->num_boids_spin), "change-value", GTK_SCROLL_STEP_DOWN);
+		return TRUE;
 	default:
 		return FALSE;
 	}
@@ -781,12 +824,14 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_start_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gui->start_button = button;
 
 	button = gtk_button_new_with_label("Step");
 	gtk_widget_set_size_request(GTK_WIDGET(button), 68, -1);
 	g_signal_connect(G_OBJECT(button), "clicked",
 			 G_CALLBACK(on_step_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), button, FALSE, FALSE, 0);
+	gui->step_button = button;
 
 	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
@@ -801,6 +846,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_num_boids_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+	gui->num_boids_spin = spin;
 
 	separator = gtk_separator_new(GTK_ORIENTATION_VERTICAL);
 	gtk_box_pack_start(GTK_BOX(hbox), separator, FALSE, FALSE, 5);
@@ -846,6 +892,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_avoid_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->avoid_check = check;
 
 	check = gtk_check_button_new_with_label("Align");
 	active = swarm_get_rule_active(gui->swarm, RULE_ALIGN);
@@ -853,6 +900,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_align_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->align_check = check;
 
 	check = gtk_check_button_new_with_label("Cohesion");
 	active = swarm_get_rule_active(gui->swarm, RULE_COHESION);
@@ -860,6 +908,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_cohesion_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->cohesion_check = check;
 
 	check = gtk_check_button_new_with_label("FoV Dead Angle");
 	active = swarm_get_rule_active(gui->swarm, RULE_DEAD_ANGLE);
@@ -867,6 +916,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_dead_angle_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->fov_check = check;
 
 	spin = gtk_spin_button_new_with_range(0, 360, 10);
 	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_dead_angle(gui->swarm));
@@ -883,6 +933,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_speed_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
+	gui->speed_spin = spin;
 
 	hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 	gtk_box_set_spacing(GTK_BOX(hbox), 5);
@@ -916,6 +967,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	g_signal_connect(G_OBJECT(check), "toggled",
 			 G_CALLBACK(on_predator_clicked), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), check, FALSE, FALSE, 0);
+	gui->predator_check = check;
 
 	if (swarm_show_debug_controls(gui->swarm))
 		gui_show_debug_controls(gui, vbox);
