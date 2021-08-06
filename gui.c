@@ -727,6 +727,7 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	GtkWidget *check;
 	GtkWidget *radio;
 	GtkWidget *combo;
+	GtkAdjustment *adj;
 	gboolean active;
 	gint width;
 	gint height;
@@ -795,8 +796,9 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-	spin = gtk_spin_button_new_with_range(MIN_BOIDS, MAX_BOIDS, 100);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_num_boids(gui->swarm));
+	adj = gtk_adjustment_new(swarm_get_num_boids(gui->swarm),
+				 MIN_BOIDS, MAX_BOIDS, 100, 100, 0.0);
+	spin = gtk_spin_button_new(adj, 0, 0);
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_num_boids_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
@@ -877,8 +879,8 @@ static void gui_activate(GtkApplication* app, BoidsGui *gui)
 	gtk_label_set_xalign(GTK_LABEL(label), 1.0);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
 
-	spin = gtk_spin_button_new_with_range(MIN_SPEED, MAX_SPEED, 0.2);
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(spin), swarm_get_speed(gui->swarm));
+	adj = gtk_adjustment_new(swarm_get_speed(gui->swarm), MIN_SPEED, MAX_SPEED, 0.2, 0.2, 0.0);
+	spin = gtk_spin_button_new(adj, 0, 1);
 	g_signal_connect(G_OBJECT(spin), "value-changed",
 			 G_CALLBACK(on_speed_changed), gui);
 	gtk_box_pack_start(GTK_BOX(hbox), spin, FALSE, FALSE, 0);
