@@ -639,24 +639,23 @@ static gboolean on_keypress(GtkWidget *widget, GdkEventKey *event,
 			    BoidsGui *gui)
 {
 	GdkWindowState state;
+	gboolean is_fullscreen;
 
 	if (event->type != GDK_KEY_PRESS)
 		return FALSE;
 
-	state = gdk_window_get_state(event->window);
-
 	switch (event->keyval) {
 	case GDK_KEY_F11:
-		break;
 	case GDK_KEY_Escape:
-		if (!(state & GDK_WINDOW_STATE_FULLSCREEN))
+		state = gdk_window_get_state(event->window);
+		is_fullscreen = state & GDK_WINDOW_STATE_FULLSCREEN;
+		if (!is_fullscreen && event->keyval == GDK_KEY_Escape)
 			return FALSE;
+		gui_set_fullscreen(gui, !is_fullscreen);
 		break;
 	default:
 		return FALSE;
 	}
-
-	gui_set_fullscreen(gui, !(state & GDK_WINDOW_STATE_FULLSCREEN));
 
 	return TRUE;
 }
