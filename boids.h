@@ -75,8 +75,6 @@ typedef struct {
 	gdouble avoid_radius;
 } Obstacle;
 
-typedef struct _Swarm Swarm;
-
 typedef void (*SwarmAnimateFunc)(gpointer userdata, gulong time);
 
 typedef struct _Swarm {
