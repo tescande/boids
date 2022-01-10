@@ -111,8 +111,7 @@ typedef struct _Swarm {
 	guint cohesion_dist;
 
 	Vector mouse_pos;
-	gboolean scary_mouse;
-	gboolean attractive_mouse;
+	MouseMode mouse_mode;
 
 	gboolean predator;
 
