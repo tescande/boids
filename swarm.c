@@ -371,6 +371,11 @@ void swarm_set_mouse_pos(Swarm *swarm, gdouble x, gdouble y)
 	}
 }
 
+MouseMode swarm_get_mouse_mode(Swarm *swarm)
+{
+	return swarm->mouse_mode;
+}
+
 void swarm_set_mouse_mode(Swarm *swarm, MouseMode mode)
 {
 	if (mode == MOUSE_MODE_SCARY)
