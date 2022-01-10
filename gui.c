@@ -30,6 +30,7 @@ typedef struct {
 	cairo_t *cr;
 	gint bg_color;
 	guint inhibit_cookie;
+	guint cursor_timeout;
 
 	gboolean running;
 
@@ -352,6 +353,36 @@ static void gui_init(BoidsGui *gui)
 	gui_draw(gui);
 }
 
+static gboolean gui_hide_mouse_cursor(BoidsGui *gui)
+{
+	GdkCursor *c;
+	GdkWindowState state;
+	gboolean is_fullscreen;
+
+	gui->cursor_timeout = 0;
+
+	state = gdk_window_get_state(gtk_widget_get_window(gui->window));
+	is_fullscreen = state & GDK_WINDOW_STATE_FULLSCREEN;
+
+	if (!gui->running || !is_fullscreen || swarm_get_mouse_mode(gui->swarm) != MOUSE_MODE_NONE)
+		return FALSE;
+
+	c = gdk_cursor_new_for_display(gdk_display_get_default(), GDK_BLANK_CURSOR);
+	gdk_window_set_cursor(gtk_widget_get_window(gui->window), c);
+
+	return FALSE;
+}
+
+static void gui_show_mouse_cursor(BoidsGui *gui)
+{
+	gdk_window_set_cursor(gtk_widget_get_window(gui->window), NULL);
+
+	if (gui->cursor_timeout > 0)
+		g_source_remove(gui->cursor_timeout);
+
+	gui->cursor_timeout = g_timeout_add(1000, G_SOURCE_FUNC(gui_hide_mouse_cursor), gui);
+}
+
 static void gui_set_fullscreen(BoidsGui *gui, gboolean fullscreen)
 {
 	if (fullscreen) {
@@ -361,6 +392,8 @@ static void gui_set_fullscreen(BoidsGui *gui, gboolean fullscreen)
 		gtk_window_unfullscreen(GTK_WINDOW(gui->window));
 		gtk_widget_show(gui->controls_vbox);
 	}
+
+	gui_show_mouse_cursor(gui);
 }
 
 static void gui_simulation_start(BoidsGui *gui)
@@ -371,6 +404,8 @@ static void gui_simulation_start(BoidsGui *gui)
 
 	gui->inhibit_cookie = gtk_application_inhibit(gui->app, NULL,
 					 GTK_APPLICATION_INHIBIT_IDLE, "boids");
+
+	gui_show_mouse_cursor(gui);
 }
 
 static void gui_simulation_stop(BoidsGui *gui)
@@ -384,6 +419,8 @@ static void gui_simulation_stop(BoidsGui *gui)
 		gtk_application_uninhibit(gui->app, gui->inhibit_cookie);
 		gui->inhibit_cookie = 0;
 	}
+
+	gui_show_mouse_cursor(gui);
 }
 
 static void on_draw(GtkDrawingArea *da, cairo_t *cr, BoidsGui *gui)
@@ -565,6 +602,7 @@ static gboolean on_mouse_event(GtkWidget *da, GdkEvent *event, BoidsGui *gui)
 		control = ((event->button.state & GDK_CONTROL_MASK) != 0);
 		break;
 	case GDK_MOTION_NOTIFY:
+		gui_show_mouse_cursor(gui);
 		x = event->motion.x;
 		y = event->motion.y;
 		button1 = ((event->motion.state & GDK_BUTTON1_MASK) != 0);
