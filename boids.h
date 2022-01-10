@@ -77,6 +77,19 @@ typedef struct {
 
 typedef void (*SwarmAnimateFunc)(gpointer userdata, gulong time);
 
+typedef enum {
+	RULE_AVOID,
+	RULE_ALIGN,
+	RULE_COHESION,
+	RULE_DEAD_ANGLE,
+} SwarmRule;
+
+typedef enum {
+	MOUSE_MODE_NONE = 0,
+	MOUSE_MODE_SCARY,
+	MOUSE_MODE_ATTRACTIVE,
+} MouseMode;
+
 typedef struct _Swarm {
 	GArray *boids;
 	GArray *obstacles;
@@ -106,19 +119,6 @@ typedef struct _Swarm {
 	gboolean debug_controls;
 	gboolean debug_vectors;
 } Swarm;
-
-typedef enum {
-	RULE_AVOID,
-	RULE_ALIGN,
-	RULE_COHESION,
-	RULE_DEAD_ANGLE,
-} SwarmRule;
-
-typedef enum {
-	MOUSE_MODE_NONE = 0,
-	MOUSE_MODE_SCARY,
-	MOUSE_MODE_ATTRACTIVE,
-} MouseMode;
 
 static inline gdouble deg2rad(gdouble deg)
 {
