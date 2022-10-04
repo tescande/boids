@@ -1,2 +1,3 @@
 *.o
 boids
+cmake_install.cmake
